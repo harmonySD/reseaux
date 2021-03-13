@@ -7,11 +7,11 @@ tout ce qui est nécessaire pour former un diffuseur,
 entité réseau qui reçoit des messsages de clients, 
 se fait connaître des gestionnaires de diffuseurs
 et émet des messages en continu d'après ceux reçus par les clients 
+Une instance de la classe diffuseur = une borne de diffusion, peut en exiser plusieurs par machine et par réseau
 
+___Dépendances__
 
-___Dépendances
-
-
+holder.java
 
 
 RAPPEL
@@ -25,12 +25,14 @@ num-diff 2 octets contient une chaîne de caractères correspondant au nombre de
 
 ___Liste des messages que peut envoyer le diffuseur 
 * "DIFF num-mess id message" 
-
-* "MESS id message" 
+* "ACKM"
+* "OLDM num-mess id message"
+* "ENDM" 
 
 ___Liste des messages que peut recevoir le diffuseur
 
-
+* "MESS id message"
+* "LAST nb-mess"
 ___Champs d'instance du diffuseur 
 
 * "id" entier, 
@@ -42,7 +44,7 @@ déterminé une fois pour toutes au lancement du diffuseur
 * diffprt entier, port de diffusion sur lequel émet broadcastloop
 * frqcy entier, intervalle de temps minimal entre la diffusion de deux messages par le diffuseur sur le port de diffusion
 * messglist liste, 
-SOURCE D'ACCES CONCCURRENT entre broadcastloop et receiveloop
+SOURCE D'ACCES CONCCURRENT entre broadcastloop,receiveloop, et historygiver
 liste contenant tous les messages que le diffuseur peut diffuser ***
 
 ___méthodes d'instances
@@ -50,9 +52,16 @@ ___méthodes d'instances
 * broadcastloop() 
 boucle de diffusion envoi des messages en continu, dans un thread 
 
-* receiveloop() boucle de réception de nouveaux messages à diffuser en continu en plus de ceux déjà présents, dans un thread 
+* receiveloop() boucle de réception de nouveaux messages à diffuser en continu en plus de ceux déjà présents, dans un thread.
+appelle aussi des historygiver dans des nouveaux thread lorsque des gens souhaitent avoir un historique des derniers messages envoyés
+
+*  historygiver() fonction qui sert à fournir à un utilisateur une liste des derniers messages diffusés à un instant T
+se créé puis se détruit "à la demande" lors qu'un client veut l'historique et une fois que c'est terminé dans un thread, un par client.
+sera créé à partir de receiveloop
+
 
 ___champs statiques 
 
+??
 ___méthodes statiques
-
+??
