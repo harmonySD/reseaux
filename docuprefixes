@@ -35,7 +35,9 @@ ___Champs d'instances
 
 ___méthodes d'instances
 
-
+@Override toString 
+renvoit le nom de l'objet tel que déclarer dans l'énumération,
+grâce à this.name
 
 ___champs statiques 
 
@@ -43,12 +45,5 @@ ___champs statiques
 
 ___méthodes statiques
 
-ces methodes permettent de savoir pour chaque
-préfixe si le client,le gestionnaire ou le diffuseur
-est supposé recevoir ce message
-Boolean broadcasterCanReceive
-Boolean broadcasterCanEmit
-Boolean managerCanReceive
-Boolean managerCanEmit
-Boolean CanReceive
-Boolean CanEmit
+
+
