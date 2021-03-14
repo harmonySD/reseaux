@@ -1,0 +1,43 @@
+Classe Holder
+
+
+___Idée générale 
+
+
+Cette classe sert à contenir les messages qu'un diffuseur 
+doit émettre via la classe Message, jusqu'à 999 messages
+
+elle conserve aussi un historique des 999 derniers messages émis
+
+pourquoi ne pas faire une BD SQL sinon ?
+
+Source d'accès concurrents, *DOIT* être Thread-safe
+
+
+___Dépendances
+
+message.java
+
+___Champs d'instances
+
+holded message 
+history 
+
+___méthodes d'instances
+
+
+addMessage() permet d'ajouter un nouveau message à envoyer 
+retrieveHistory() permet de récupérer une copie de l'historique des envois à l'instant T de l'appel
+next_to_send() fonction qui permet de fournir le prochain message à envoyer et incrémente de 1 le compteur de message envoyés 
+
+Amend() fonction qui permet de signaler que le dernier message récupéré avec next_to_send n'a pas été envoyé et donc de le desincrémenter.
+et de le mettre à nouveau comme le prochain message à envoyer.
+Si on appelle Amend deux fois de suite sans faire un next_to_send entre les deux ne fait rien / lance une erreur
+
+
+___champs statiques 
+
+
+
+___méthodes statiques
+

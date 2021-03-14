@@ -1,0 +1,34 @@
+
+Classe 
+
+
+___Idée générale 
+
+Cette classe sert à stocker de manière uniformisée 
+les messages et permet de joindre au stockage
+quelques méthodes très pratiques
+
+
+
+___Dépendances
+
+
+
+___Champs d'instances
+
+* private final id tableau de 8 caractères contenant l'id de l'émetteur du message
+* private final data tableau de  140 caractères contenant le message à transmettre
+* private unsigned int number entier non signé qui permet de savoir combien de fois a été envoyé chaque message 
+
+___méthodes d'instances
+
+accesseurs des champs id, data et number
+mutateur du champ unsigned int number
+toString qui renvoit le message "prêt à l'envoi"
+sous la form "num-messag id data"
+
+___champs statiques 
+
+
+
+___méthodes statiques

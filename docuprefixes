@@ -1,0 +1,54 @@
+
+Classe prefixes
+
+
+___Idée générale 
+
+
+Cette classe est une énumération qui permet de stocker
+tous les préfixes de communications utilisés par tous, c-a-d
+- les clients
+- les serveurs 
+- les gestionnaires
+
+___Dépendances
+
+__liste complète des instances
+
+DIFF
+MESS
+ACKM
+LAST
+OLDM
+ENDM
+REGI
+REOK
+RENO
+RUOK
+IMOK
+LIST
+LINB
+ITEM
+
+___Champs d'instances
+
+
+___méthodes d'instances
+
+
+
+___champs statiques 
+
+
+
+___méthodes statiques
+
+ces methodes permettent de savoir pour chaque
+préfixe si le client,le gestionnaire ou le diffuseur
+est supposé recevoir ce message
+Boolean broadcasterCanReceive
+Boolean broadcasterCanEmit
+Boolean managerCanReceive
+Boolean managerCanEmit
+Boolean CanReceive
+Boolean CanEmit
