@@ -21,7 +21,7 @@ typedef struct{
     char port[4];
     char ip[15];
 }diffu;
-diffu connection_gestionnaire(char *argv){ //pas void mais diffu ?
+diffu connection_gestionnaire(char *argv){ 
     int p=atoi(argv);
     struct sockaddr_in adress_sock;
     adress_sock.sin_family = AF_INET;
@@ -31,8 +31,8 @@ diffu connection_gestionnaire(char *argv){ //pas void mais diffu ?
     int r = connect(descr, (struct sockaddr *)&adress_sock,
                     sizeof(struct sockaddr_in));
     if(r !=1){
-        /*
-        envoie message LIST 
+        
+       /* envoie message LIST 
         doit recevoir  LINB num_diff 
         creer tableau de taille num diff  de structure diffu 
         puis boucle sur num_diff 
@@ -41,8 +41,8 @@ diffu connection_gestionnaire(char *argv){ //pas void mais diffu ?
         fin boucle 
         choisir un nb aleatoire 
         prendre le diffu a cette place 
-        renvoyer le diffu 
-        */
+        renvoyer le diffu */
+        
     }
 }
 
@@ -60,7 +60,7 @@ void connection_diffuseur(char *port, char *ip, char *id){
     mreq.imr_interface.s_addr=htonl(INADDR_ANY);
     r=setsockopt(sock,IPPROTO_IP,IP_ADD_MEMBERSHIP,&mreq,sizeof(mreq));
 
-    //si on veut envoyer un message a l'emetteur (aka diffuseur)
+    //si on veut envoyer un message a l'emetteur (aka diffuseur) MAIS JE CROIS PAS BESOIN 
     struct sockaddr_in emet;
     socklen_t a=sizeof(emet);
 
@@ -68,7 +68,15 @@ void connection_diffuseur(char *port, char *ip, char *id){
         while(1){
             //recevoir et peut etre envoyer mais comment faire si on veut envoyer un seule mess
             //et continuer a recevoir le diffu ?
-            
+            char mess[4]; //MESS
+            if (fgets(mess,4,stdin)!=NULL){
+                //regarder si MESS ou LAST 
+                //envoie message choisit au hasard 
+            }
+            char mess_recu[SIZE_MESS+4+8+4+3+1]; //+3 pour les espaces +1 pour '\0'
+            int rec=recv(sock,mess_recu,SIZE_MESS+4+8+4+3,0);
+            mess_recu[rec]='\0';
+            printf("Message recu :%s\n",mess_recu);
         }
 
     }
