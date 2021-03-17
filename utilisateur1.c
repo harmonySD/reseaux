@@ -13,7 +13,7 @@ int SIZE_MESS=140;
 /* un client se connecte a un gestionnaire 
 choisit son diffuseuer
 se connecte au diffuseur 
-interrgit avec le diffuseur 
+interragit avec le diffuseur 
 recoit les multicast (aka udp etc)
 envoie des messages en TCP */
 
@@ -65,13 +65,17 @@ void connection_diffuseur(char *port, char *ip, char *id){
     socklen_t a=sizeof(emet);
 
     if(r==0){
-        while(1){
+        while(1){//while recv !=0 ?
             //recevoir et peut etre envoyer mais comment faire si on veut envoyer un seule mess
             //et continuer a recevoir le diffu ?
             char mess[4]; //MESS
             if (fgets(mess,4,stdin)!=NULL){
-                //regarder si MESS ou LAST 
-                //envoie message choisit au hasard 
+                if(strcmp(mess,"MESS")){
+                    //envoie message choisit au hasard
+                }
+                else if(strstr(mess,"LAST")){
+                    //envoie mess (normalement contient LAST 6) par exemple 
+                }
             }
             char mess_recu[SIZE_MESS+4+8+4+3+1]; //+3 pour les espaces +1 pour '\0'
             int rec=recv(sock,mess_recu,SIZE_MESS+4+8+4+3,0);
