@@ -72,9 +72,11 @@ void connection_diffuseur(char *port, char *ip, char *id){
             if (fgets(mess,4,stdin)!=NULL){
                 if(strcmp(mess,"MESS")){
                     //envoie message choisit au hasard
+                    // verifier bien recu ACKM apres 
                 }
                 else if(strstr(mess,"LAST")){
                     //envoie mess (normalement contient LAST 6) par exemple 
+                    //boucle sur nombre de mess etc 
                 }
             }
             char mess_recu[SIZE_MESS+4+8+4+3+1]; //+3 pour les espaces +1 pour '\0'
