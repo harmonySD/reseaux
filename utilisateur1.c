@@ -50,22 +50,15 @@ typedef struct{
 void *sendMessage(void *sock_desc) {
     int so=*((int *) sock_desc);
     //Send some data
-    struct sockaddr_in adress_sock;
-    adress_sock.sin_family = AF_INET;
-    adress_sock.sin_port = htons(3434);
-    inet_aton("225.1.2.4",&adress_sock.sin_addr);
-  
-    int descr=socket(PF_INET,SOCK_STREAM,0);
-
-        
-
     while (1) {
         char message[2000];
         printf("%s","> ");
         scanf("%[^\n]%*c", message);
         fflush(stdin);
 
-        send(descr, message, strlen(message), 0);
+        if(send(sock_desc, message, strlen(message), 0)<0){
+            puts("error ! not send");
+        }
     }
 }
 
@@ -91,20 +84,13 @@ void connection_diffuseur(char *port, char *ip, char *id){
    
 
     if(r==0){
-        // int *new_sock;
-        // new_sock = malloc(1);
-        // *new_sock = sock;
-
-        int new_sock=socket(PF_INET,SOCK_STREAM,0);
-        struct sockaddr_in address_sock2;
-        address_sock2.sin_family=AF_INET;
-        address_sock2.sin_port=htons(3434);
-        address_sock2.sin_addr.s_addr=htonl(INADDR_ANY);
+        int *new_sock;
+        new_sock = malloc(1);
+        *new_sock = sock;
         
-        struct sockaddr_in caller;
-        socklen_t size=sizeof(caller);
-        int *sock2=(int *)malloc(sizeof(int));
-        *sock2=accept(sock,(struct sockaddr *)&caller,&size);
+         //keep communicating with server
+        pthread_t send_thread;
+        pthread_create(&send_thread, NULL, sendMessage, (void *) new_sock);
     
         while(1){//while recv !=0 ?
             //recevoir et peut etre envoyer mais comment faire si on veut envoyer un seule mess
@@ -128,9 +114,9 @@ void connection_diffuseur(char *port, char *ip, char *id){
 
   
 
-            //keep communicating with server
-            pthread_t send_thread;
-            pthread_create(&send_thread, NULL, sendMessage, (void *) sock2);
+            // //keep communicating with server
+            // pthread_t send_thread;
+            // pthread_create(&send_thread, NULL, sendMessage, (void *) sock);
 
         }
 
