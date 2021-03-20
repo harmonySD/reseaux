@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <time.h>
 #include <errno.h>
+#include <pthread.h>
 
 int SIZE_ID=8;
 int SIZE_MESS=140;
@@ -46,18 +47,42 @@ typedef struct{
     }
 }*/
 
+void *sendMessage(void *sock_desc) {
+    int so=*((int *) sock_desc);
+    //Send some data
+    struct sockaddr_in adress_sock;
+    adress_sock.sin_family = AF_INET;
+    adress_sock.sin_port = htons(3434);
+    inet_aton("225.1.2.4",&adress_sock.sin_addr);
+  
+    int descr=socket(PF_INET,SOCK_STREAM,0);
+
+        
+
+    while (1) {
+        char message[2000];
+        printf("%s","> ");
+        scanf("%[^\n]%*c", message);
+        fflush(stdin);
+
+        send(descr, message, strlen(message), 0);
+    }
+}
+
 void connection_diffuseur(char *port, char *ip, char *id){
     int sock=socket(PF_INET,SOCK_DGRAM,0);
     int ok=1;
     int r=setsockopt(sock,SOL_SOCKET,SO_REUSEPORT,&ok,sizeof(ok));
     struct sockaddr_in address_sock;
     address_sock.sin_family=AF_INET;
-    address_sock.sin_port=htons(3434);
+    address_sock.sin_port=htons(3434);//remplacer par port 
     address_sock.sin_addr.s_addr=htonl(INADDR_ANY);
     r=bind(sock,(struct sockaddr *)&address_sock,sizeof(struct sockaddr_in));
+    
     struct ip_mreq mreq;
-    mreq.imr_multiaddr.s_addr=inet_addr("225.1.2.4");
+    mreq.imr_multiaddr.s_addr=inet_addr("225.1.2.4");//remplacer par ip
     mreq.imr_interface.s_addr=htonl(INADDR_ANY);
+
     r=setsockopt(sock,IPPROTO_IP,IP_ADD_MEMBERSHIP,&mreq,sizeof(mreq));
 
     //si on veut envoyer un message a l'emetteur (aka diffuseur) MAIS JE CROIS PAS BESOIN 
@@ -66,6 +91,21 @@ void connection_diffuseur(char *port, char *ip, char *id){
    
 
     if(r==0){
+        // int *new_sock;
+        // new_sock = malloc(1);
+        // *new_sock = sock;
+
+        int new_sock=socket(PF_INET,SOCK_STREAM,0);
+        struct sockaddr_in address_sock2;
+        address_sock2.sin_family=AF_INET;
+        address_sock2.sin_port=htons(3434);
+        address_sock2.sin_addr.s_addr=htonl(INADDR_ANY);
+        
+        struct sockaddr_in caller;
+        socklen_t size=sizeof(caller);
+        int *sock2=(int *)malloc(sizeof(int));
+        *sock2=accept(sock,(struct sockaddr *)&caller,&size);
+    
         while(1){//while recv !=0 ?
             //recevoir et peut etre envoyer mais comment faire si on veut envoyer un seule mess
             //et continuer a recevoir le diffu ?
@@ -84,6 +124,14 @@ void connection_diffuseur(char *port, char *ip, char *id){
             int rec=recvfrom(sock,mess_recu,SIZE_MESS+4+8+4+3,0,(struct sockaddr *)&emet,&a);
             mess_recu[rec]='\0';
             printf("Message recu :%s\n",mess_recu);
+
+
+  
+
+            //keep communicating with server
+            pthread_t send_thread;
+            pthread_create(&send_thread, NULL, sendMessage, (void *) sock2);
+
         }
 
     }
