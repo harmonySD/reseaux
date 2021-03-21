@@ -56,7 +56,7 @@ void *sendMessage(void *sock_desc) {
         scanf("%[^\n]%*c", message);
         fflush(stdin);
 
-        if(send(sock_desc, message, strlen(message), 0)<0){
+        if(send(so, message, strlen(message), 0)<0){
             puts("error ! not send");
         }
     }
@@ -83,15 +83,21 @@ void connection_diffuseur(char *port, char *ip, char *id){
     socklen_t a=sizeof(emet);
    
 
-    if(r==0){
-        int *new_sock;
-        new_sock = malloc(1);
-        *new_sock = sock;
-        
-         //keep communicating with server
-        pthread_t send_thread;
-        pthread_create(&send_thread, NULL, sendMessage, (void *) new_sock);
-    
+    if(r==0){    
+        struct sockaddr_in adress_sock2;
+        adress_sock2.sin_family = AF_INET;
+        adress_sock2.sin_port = htons(5757);
+        inet_aton("127.0.0.1",&adress_sock2.sin_addr);
+  
+        int descr=socket(PF_INET,SOCK_STREAM,0);
+        int r2=connect(descr,(struct sockaddr *)&adress_sock2,
+                sizeof(struct sockaddr_in));
+        if(r2!=-1){
+            char *mess="SALUT!\n";
+            send(descr,mess,strlen(mess),0);
+            pthread_t thread;
+            pthread_create(&thread,NULL,sendMessage,&descr );
+        }
         while(1){//while recv !=0 ?
             //recevoir et peut etre envoyer mais comment faire si on veut envoyer un seule mess
             //et continuer a recevoir le diffu ?
@@ -112,6 +118,7 @@ void connection_diffuseur(char *port, char *ip, char *id){
             printf("Message recu :%s\n",mess_recu);
 
 
+       
   
 
             // //keep communicating with server
