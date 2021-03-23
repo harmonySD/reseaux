@@ -12,7 +12,7 @@ public enum Prefixes {
 	,IMOK 
 	,LIST  
 	,LINB 
-	,ITEM ;
+	,ITEM;
 	@Override 
 	public String toString(){ return this.name();}
 	}

@@ -6,7 +6,7 @@ Cette classe rassemble
 tout ce qui est nécessaire pour former un diffuseur,
 entité réseau qui reçoit des messsages de clients, 
 se fait connaître des gestionnaires de diffuseurs
-et émet des messages en continu d'après ceux reçus par les clients 
+et émet des messages d'après ceux reçus par les clients 
 Une instance de la classe diffuseur = une borne de diffusion, peut en exiser plusieurs par machine et par réseau
 
 ___Dépendances__
@@ -34,6 +34,8 @@ ___Liste des messages que peut recevoir le diffuseur
 
 * "MESS id message"
 * "LAST nb-mess"
+
+
 ___Champs d'instance du diffuseur 
 
 * "id" entier, 
@@ -42,12 +44,11 @@ chaîne de caractère d'au plus 8 caractères,
 déterminé une fois pour toutes au lancement du diffuseur
 
 * rcvprt entier,  port de réception sur lequel écoute receiveloop
-* diffprt entier, port de diffusion sur lequel émet broadcastloop
+* diffprt entier, port de diffusion sur lequel émet multicastloop
 * frqcy entier, intervalle de temps minimal entre la diffusion de deux messages par le diffuseur sur le port de diffusion
 * messglist liste, 
 SOURCE D'ACCES CONCCURRENT entre broadcastloop,receiveloop, et historygiver
 liste contenant tous les messages que le diffuseur peut diffuser ***
-
 * broadcastthread Thread, contient le thread de la fonction de broadcast
 * receivethread Thread, contient le thread de la fonction de receive
 

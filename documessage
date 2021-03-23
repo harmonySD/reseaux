@@ -18,14 +18,12 @@ ___Champs d'instances
 
 * private final id tableau de 8 caractères contenant l'id de l'émetteur du message
 * private final data tableau de  140 caractères contenant le message à transmettre
-* private unsigned int number entier non signé qui permet de savoir combien de fois a été envoyé chaque message 
 
 ___méthodes d'instances
 
-accesseurs des champs id, data et number
-mutateur du champ unsigned int number
-toString qui renvoit le message "prêt à l'envoi"
-sous la form "num-messag id data"
+accesseurs des champs id, data 
+toString qui renvoit le contenu du message 
+sous la form "id data"
 
 ___champs statiques 
 

@@ -11,13 +11,13 @@ public class Diffuseur<T>{
 	private unsigned int rcvprt;
 	private unsigned int brdcstprt;
 	private unsigned int frqcy= 5000;
-	private T dataholder ;
+	private T dataholder ;// ACCES CONCURRENT
 	private  Thread broadcastthread ;
 	private  Thread receivethread;
 	public boolean startBroadcast(){}
 	public boolean startListen()throws{}
 	
-	public Diffuseur(unsigned int recvport, unsigned int brdcastThread , String id){
+	public Diffuseur(unsigned int recvPort, unsigned int multiCastPort , String id){
 	}
 	
 	private broadcastloop (){
