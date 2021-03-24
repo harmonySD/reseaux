@@ -6,8 +6,9 @@ import
  * 
  * 
  * **/
-public class Diffuseur<T>{
-	private char [] id = new char[8];
+public class Diffuseur{
+	public static final int idsz = 8;
+	private final String id ;
 	private unsigned int rcvprt;
 	private unsigned int brdcstprt;
 	private unsigned int frqcy= 5000;

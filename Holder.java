@@ -1,7 +1,6 @@
 public class Holder implements Iterator<Message> {
 	
 	public Holder(){};
-	
 
 	unsigned int memorypos =0;
 	unsigned int nextpos=0;
@@ -18,6 +17,6 @@ public class Holder implements Iterator<Message> {
 		this.nextpos = (this.nextpos+1)%this.memorypos; // préparation pour le prochain next
 		
 		return toret;}
-	 Message[] retrieveHistory(int howmany){//FIXME a faire
+	 String[] retrieveHistory(int howmany){//FIXME a faire
 		 };
 	}

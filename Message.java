@@ -1,6 +1,8 @@
 public class Message {
-	private final char [] id = new char [8];
-	private final char[] data = new char [140];
+	public static final idsz=8;
+	public static final datasz=140;
+	private final String id ;
+	private final String data  ;
 
 	@Override 
 	public String toString(){
