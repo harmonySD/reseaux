@@ -1,4 +1,6 @@
 public enum Prefixes {
+	// liste uniformisée de tous les 
+	// préfixe admissible sur le réseau
 	 DIFF 
 	,MESS
 	,ACKM
