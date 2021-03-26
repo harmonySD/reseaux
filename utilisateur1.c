@@ -108,8 +108,28 @@ void *sendMessage(void *sock_desc) {
             if(strstr(recu,"ACKM")==NULL){
                 printf("Message non recu par le diffuseur");  
             }
-        }else{
-            printf("beurk\n");
+        }else if(strstr(message,"LAST")){
+            char nb[4];
+            printf("%s","afficher combien de message de l'historique : ");
+            scanf("%[^\n]%*c",nb);
+            fflush(stdin);
+            //int nbMess=atoi(nb);//si nb pas un nb alors 0
+            char *m=verif_lenght(nb,3);
+            printf("m %s",m);
+            char mess[4+1+4];//3 marhe pas ???
+            strcpy(mess,message);
+            strcat(mess," ");
+            strcat(mess,m);
+            printf("%lu",strlen(mess));
+            // send(so,mess,4+1+3,0);
+            // char recu[5];
+            // int taille_rec=recv(so,recu,5,0);
+            // recu[taille_rec]='\0';
+            // while (strstr(recu,"ENDM")==NULL){
+            //     printf("message de l'historique :%s",recu);
+            //     int taille_rec=recv(so,recu,5,0);
+            //     recu[taille_rec]='\0';
+            // }
         }
         //regarder si MESS ou LAST 
         //si MESS 
