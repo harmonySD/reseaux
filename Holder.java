@@ -7,40 +7,48 @@ public class Holder implements Iterator<Message> {
 	private ConcurrentLinkedDeque<Message> toSendQueue= new ConcurrentLinkedDeque();
 	int toSendOccupation=0;
 	int nextMessageNumber=0;
-	private ConcurrentLinkedDeque<Message> HistoryQueue= new ConcurrentLinkedDeque();
+	private Message [] HistoryQueue= new Message[HOLDSZ];
 	int historyOccupation =0;
 	
-	
-	public void add(Message toadd) throws NullPointerException{
+	public synchronized void add(Message toadd) throws NullPointerException{
+		/**Ajoute un Message à la liste des messages à envoyer
+		 * lance NullPointerException si l'argument est null  **/
 		if (toadd == null){throw new NullPointerException();}
-		if (tosendOccupation< HOLDSZ ){
+		if (tosendOccupation< HOLDSZ ){ // si la queue n'est pas pleine
 			this.toSendQueue.add(toadd);
-			toSendOccupation++;
-		}else{
+			toSendOccupation++; // on augmente le compteur
+		}else{ // si la queue est pleine on supprimme le plus ancien non envoyé
 			this.toSendQueue.removeLast();
 			this.toSendQueue.add(toadd);
-			}
+		}// pas d'augmentation compteur, liste déjà pleine !
 	}
+	
 	@Override
 	public synchronized boolean hasNext() { 
-		return toSendOccupation <= 0 ? false:true;
+		return toSendOccupation < 1 ? false:true;
 	}
 		
 	@Override
-	public  synchronized String next() throws NoSuchElementException {
+	public  synchronized String next() throws NoSuchElementException { // renvoit le prochain message à envoyer
 		Message temp = toSendQueue.removeLast(); // lance NSEException si queue vide
-		this.toSendOccupation --;
-		String toret = this.nextMessageNumber.+temp.toString();
-		this.nextMessageNumber=(this.nextMessage  +1 )% HOLDSZ;
-		
-		//si occupation maximale est atteinte on enlève le plus ancien élément et on en ajoute un nouveau
-		if(this.historyOccupation>=HOLDSZ){this.History.removeLast();this.HistoryQueue.add(temp);}
-		else{this.History.add(temp); this.historyOccupation++;}
-		
+		this.toSendOccupation --; //maj occupation file à envoyer
+		String toret = this.nextMessageNumber.toString()+" "+temp.toString();// ajout du numéro du message pour envoi
+		if (this.historyOccupation< HOLDSZ){this.historyOccupation++;}
+		this.HistoryQueue[this.nextMessageNumber]=temp;
+		this.nextMessageNumber=(this.nextMessage  +1 )%HOLDSZ;
 		return toret;
 	}
 		
 	 public synchronized String[] retrieveHistory(int howmany){
-		
+		 //FIXME incorrect, il faut aussi prendre en compte 
+		 // OU est le message le plus récent
+		howmany = howmany %HOLDSZ;
+		int i = howmany <= historyOccupation ? howmany : historyOccupation;
+		String [] toret = new String[i];
+		i--; // i était l'occupation du tableau et est maintenant l'indice ou chercher
+		for (;i>-1;i--){
+			toret[i]= i.toString() +" "+HistoryQueue[i].toString();
+		}
+			return toret;
 	};
 }
