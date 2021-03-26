@@ -105,9 +105,17 @@ void *sendMessage(void *sock_desc) {
             strcat(mess," ");
             strcat(mess,m);
             send(so,mess,SIZE_ID+4+2+SIZE_MESS,0);
+            char recu[5];
+            int taille_rec=recv(so,recu,5,0);
+            recu[taille_rec]='\0';
+            printf("recu %s\n",recu);
+            if(strstr(recu,"ACKM")==NULL){
+                printf("Message non recu par le diffuseur");
+                
+            }
 
-
-            
+        }else{
+            printf("beurk\n");
         }
         //regarder si MESS ou LAST 
         //si MESS 
