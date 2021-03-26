@@ -83,12 +83,8 @@ void *sendMessage(void *sock_desc) {
     thread_arg *foo =(thread_arg*)sock_desc;
     int so=*foo->sock;
     char *id=foo->id;
-   
-    //int so=*((int *)sock_desc);
-    //Send some data
     while (1) {
         char message[4];
-        printf("%s","> ");
         scanf("%[^\n]%*c", message);
         fflush(stdin);
 
@@ -110,10 +106,8 @@ void *sendMessage(void *sock_desc) {
             recu[taille_rec]='\0';
             printf("recu %s\n",recu);
             if(strstr(recu,"ACKM")==NULL){
-                printf("Message non recu par le diffuseur");
-                
+                printf("Message non recu par le diffuseur");  
             }
-
         }else{
             printf("beurk\n");
         }
