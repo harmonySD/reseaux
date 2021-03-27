@@ -39,16 +39,27 @@ public class Holder implements Iterator<Message> {
 		return toret;
 	}
 		
-	 public synchronized String[] retrieveHistory(int howmany){
-		 //FIXME incorrect, il faut aussi prendre en compte 
-		 // OU est le message le plus récent
-		howmany = howmany %HOLDSZ;
-		int i = howmany <= historyOccupation ? howmany : historyOccupation;
-		String [] toret = new String[i];
-		i--; // i était l'occupation du tableau et est maintenant l'indice ou chercher
-		for (;i>-1;i--){
-			toret[i]= i.toString() +" "+HistoryQueue[i].toString();
+	public synchronized String[] retrieveHistory(int howmany){
+		String [] toret;
+		if (howmany> this.historyOccupation){
+			toret = new String[this.historyOccupation];
+			for (int i = this.historyOccupation-1;i>-1;i--){
+				toret[this.historyOccupation-i]=this.HistoryQueue[i];
+			}
 		}
+		else if (howmany<=this.nextMessageNumber-1){
+		toret = new String[howmany];
+			for (int i = this.howmany-1;i>-1;i--){
+				toret[i]=this.HistoryQueue[this.nextMessageNumber-i];
+			}
+		}
+		else{// howmany> this.nextMessagenumber-1
+		toret = new String[howmany];
+			for (int i = this.historyOccupation;i>-1;i--){
+				toret[i]=this.HistoryQueue[this.nextMessageNumber-i];
+			}
+		}
+
 			return toret;
-	};
+	}
 }
