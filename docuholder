@@ -5,10 +5,11 @@ ___Idée générale
 
 
 Cette classe sert à contenir les messages qu'un diffuseur 
-doit émettre via la classe Message, jusqu'à 999 messages
-elle conserve aussi un historique des 999 derniers messages émis
-fait l'usage de Queue à double sens "ConcurrentLinkedDeque" 
-pour stocker l'historique et les messages à envoyer
+doit émettre via la classe Message, jusqu'à HOLDSZ = 999 messages
+elle conserve aussi un historique des HOLDSZ derniers messages émis
+fait l'usage d'une file à double sens "ConcurrentLinkedDeque" 
+ les messages à envoyer
+ l'historique est quant à lui stocker 
 Source d'accès concurrents, *DOIT* être Thread-safe
 
 
@@ -18,22 +19,25 @@ message.java
 
 ___Champs d'instances
 
-historyQueue
-toSendQueue
+historyQueue // conserve un historique des derniers HOLDSZ messages envoyés
+toSendQueue // file double sens conserve jusqu'à HOLDSZ messages pas encore envoyés 
 historyOccupation //occupation de l'historique en nb de message
 toSendOccupation // nb de message n'ayant pas encore été envoyés
-nextMessageNumber
+nextMessageNumber // indique le numéro du prochain message qui sera récupéré via next 
+// permet aussi de savoir ou est le message le plus récent dans l'historique vu q'uon
+//ré-écreit de manière circulaire dans le tableau l'historique des messages
 
 ___méthodes d'instances
 
 
-addMessage() permet d'ajouter un nouveau message à envoyer 
+add(Message ) permet d'ajouter un nouveau message à envoyer 
 
 retrieveHistory(int) renvoit un tableau de taille au plus int de chaines de caractères. Ce tableau est l'historique des messages
 qui ont été auparavant récupérés par l'intermédiaire de next  à l'instant T de l'appel de retrieveHistory
+/!\ ATTENTION SI HISTORIQUE VIDE RENVOIT UN TABLEAU AVEC UNE SEULE CHAINE A NULL
 
 next() fonction qui permet de récupérer le prochain message à envoyer  
-sous la forme d'une chaîne de caractère (penser à adjoindre le numéro du message à chaque fois)
+sous la forme d'une chaîne de caractère
 
 
 
