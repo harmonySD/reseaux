@@ -126,23 +126,12 @@ void *sendMessage(void *sock_desc) {
             char recu[5];
             int taille_rec=recv(so,recu,5,0);
             recu[taille_rec]='\0';
-            //printf("message de l'historique :%s",recu);
             while (strstr(recu,"ENDM")==NULL){
                 printf("message de l'historique :%s\n",recu);
                 int taille_rec=recv(so,recu,5,0);
                 recu[taille_rec]='\0';
             }
         }
-        //regarder si MESS ou LAST 
-        //si MESS 
-        //r
-        //scaanf ragrder taille 
-        //strcpy MEss scan id etc 
-        //envoie 
-        
-    //     if(send(so, message, SIZE_MESS, 0)<0){
-    //        puts("error ! not send");
-    //    }
     }
 }
 
