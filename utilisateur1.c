@@ -113,23 +113,25 @@ void *sendMessage(void *sock_desc) {
             printf("%s","afficher combien de message de l'historique : ");
             scanf("%[^\n]%*c",nb);
             fflush(stdin);
-            //int nbMess=atoi(nb);//si nb pas un nb alors 0
+            if(atoi(nb)==0){
+                strcpy(nb,"0");
+            }
             char *m=verif_lenght(nb,3);
             printf("m %s",m);
             char mess[4+1+4];//3 marhe pas ???
             strcpy(mess,message);
             strcat(mess," ");
             strcat(mess,m);
-            printf("%lu",strlen(mess));
-            // send(so,mess,4+1+3,0);
-            // char recu[5];
-            // int taille_rec=recv(so,recu,5,0);
-            // recu[taille_rec]='\0';
-            // while (strstr(recu,"ENDM")==NULL){
-            //     printf("message de l'historique :%s",recu);
-            //     int taille_rec=recv(so,recu,5,0);
-            //     recu[taille_rec]='\0';
-            // }
+            send(so,mess,4+1+3,0);
+            char recu[5];
+            int taille_rec=recv(so,recu,5,0);
+            recu[taille_rec]='\0';
+            //printf("message de l'historique :%s",recu);
+            while (strstr(recu,"ENDM")==NULL){
+                printf("message de l'historique :%s\n",recu);
+                int taille_rec=recv(so,recu,5,0);
+                recu[taille_rec]='\0';
+            }
         }
         //regarder si MESS ou LAST 
         //si MESS 
