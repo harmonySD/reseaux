@@ -30,16 +30,16 @@ typedef struct{
 char *verif_lenght(char *str, int size){
     char *id=str; 
     int s=strlen(str);
-    //si la taille de l'id n'est pas egal a 8
+    //si la taille de l'id n'est pas egal a size
     if(s < size){
         //on rajoute des # a l'id
         for(int i = s-1; i < size-1; i++){
            strcat(id,"#");
         } 
     }
-    //si la taille est plus grande que 8
+    //si la taille est plus grande que size
     else if (s > size){
-        //on tronque l'id a 8 caracteres
+        //on tronque l'id a size caracteres
         char *id2 =NULL;
         id2=malloc(size);
         for(int i =0; i<size; i++){
@@ -48,6 +48,23 @@ char *verif_lenght(char *str, int size){
        id=id2;
     }
     return id;
+}
+char *verif_lenght_nb(char *str, int size){
+    char *nb=str;
+    int s=strlen(str);
+    if(s<size){
+        char *nb2=NULL;
+        nb2=malloc(size);
+        //ajoute des 0 de 0 a size-s 
+        for(int i=0; i<(size-s);i++){
+            nb2[i]='0';
+        }
+        strcat(nb2,nb);
+        nb=nb2;
+    }else if(s>size){
+        nb="999";
+    }
+    return nb;
 
 }
 /*diffu connection_gestionnaire(char *argv){ 
@@ -60,7 +77,23 @@ char *verif_lenght(char *str, int size){
     int r = connect(descr, (struct sockaddr *)&adress_sock,
                     sizeof(struct sockaddr_in));
     if(r !=1){
-        
+        int s=send(descr,"LIST",4,0);
+        if(s<0){
+            printf("%s\n", strerror(errno));
+        }
+        char rec[4+1+2];
+        int taille_recu=recv(descr,rec,4+1+2,0);
+        rec[taille_recu]='\0';
+        //recuperer num_diff
+        char *nbstr= strtok(rec,"LINB ");
+        int nb=atoi(nbstr);
+        diffu tab[nb];
+        for(int i=0; i<nb; i++){
+            //remplir le tableau 
+        }
+        //choix nb alea 
+
+
         // envoie message LIST 
         // doit recevoir  LINB num_diff 
         // creer tableau de taille num diff  de structure diffu 
@@ -91,7 +124,7 @@ void *sendMessage(void *sock_desc) {
             char mess[4+SIZE_MESS+SIZE_ID+2];
             strcpy(mess,message);
             strcat(mess," ");
-            strcat(mess,ID);//id ne marche pas :(
+            strcat(mess,ID);
             strcat(mess," ");
             strcat(mess,m);
             int o=send(so,mess,SIZE_ID+4+2+SIZE_MESS,0);
@@ -115,15 +148,16 @@ void *sendMessage(void *sock_desc) {
             if(atoi(nb)==0){
                 strcpy(nb,"0");
             }
-            char *m=verif_lenght(nb,3);
+            char *m=verif_lenght_nb(nb,3);
             printf("m %s",m);
-            char mess[4+1+4];
+            char mess[4+1+3];
             strcpy(mess,message);
             strcat(mess," ");
+            printf("nb %s\n",m);
             strcat(mess,m);
             send(so,mess,4+1+3,0);
             char recu[4+4+SIZE_ID+SIZE_MESS+3];
-            int taille_rec=recv(so,recu,5,0);
+            int taille_rec=recv(so,recu,4+4+SIZE_ID+SIZE_MESS+3,0);
             recu[taille_rec]='\0';
             while (strstr(recu,"ENDM")==NULL){
                 printf("message de l'historique :%s\n",recu);
@@ -178,18 +212,18 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
 }
 
 int main(int argc, char**argv){
-    if(argc != 2){
+    if(argc != 3){
         printf("Erreur il faut fournir un numero de port puis un pseudo ! ");
         return 0;
     }
-    ID=verif_lenght(argv[1],SIZE_ID);
+    ID=verif_lenght(argv[2],SIZE_ID);
     //printf("id : %s",id);
 
     //connection gestionnaire en mode TCP qui rempli une struture pour sauvegarde 
     //le port et l'adress ip choisit 
 
 
-    //diffu diffuseur=connection_gestionnaire(argv[1]);
+   // diffu diffuseur=connection_gestionnaire(argv[1]);
     printf("id %s",ID);
     connection_diffuseur("3434","225.1.2.4","5757","127.0.0.1",ID);//port et  addresse issue de la structure  PAS SURE 
 
