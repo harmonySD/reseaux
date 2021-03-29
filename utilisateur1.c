@@ -11,6 +11,7 @@
 
 int SIZE_ID=8;
 int SIZE_MESS=140;
+char *ID;
 /* un client se connecte a un gestionnaire 
 choisit son diffuseuer
 se connecte au diffuseur 
@@ -18,17 +19,13 @@ interragit avec le diffuseur
 recoit les multicast (aka udp etc)
 envoie des messages en TCP */
 
+
 typedef struct{
-    char port[4];
-    char ip[15];
+    char port1[4];
+    char ip1[15];
+    char port2[4];
+    char ip2[15];
 }diffu;
-
-typedef struct{
-    int *sock;
-    char *id;
-}thread_arg;
-
-
 
 char *verif_lenght(char *str, int size){
     char *id=str; 
@@ -80,14 +77,13 @@ char *verif_lenght(char *str, int size){
 
 
 void *sendMessage(void *sock_desc) {
-    thread_arg *foo =(thread_arg*)sock_desc;
-    int so=*foo->sock;
-    char *id=foo->id;
+    int so=*((int *) sock_desc);
+    send(so,"atchoum",strlen("atchoum"),0);
     while (1) {
         char message[4];
         scanf("%[^\n]%*c", message);
         fflush(stdin);
-
+        send(so,"atc",strlen("atc"),0);
         if(strstr(message,"MESS")){
             char messAenv[SIZE_MESS];
             printf("%s","entree votre message d'au plus 140 characteres: ");
@@ -97,10 +93,15 @@ void *sendMessage(void *sock_desc) {
             char mess[4+SIZE_MESS+SIZE_ID+2];
             strcpy(mess,message);
             strcat(mess," ");
-            strcat(mess,foo->id);//id ne marche pas :(
+            strcat(mess,ID);//id ne marche pas :(
             strcat(mess," ");
             strcat(mess,m);
-            send(so,mess,SIZE_ID+4+2+SIZE_MESS,0);
+            int o=send(so,mess,SIZE_ID+4+2+SIZE_MESS,0);
+            if(o<0){
+                printf("o =%d\n",o);
+                printf("%s\n", strerror(errno));
+            }
+            printf("mess :%s\n",mess);
             char recu[5];
             int taille_rec=recv(so,recu,5,0);
             recu[taille_rec]='\0';
@@ -118,12 +119,12 @@ void *sendMessage(void *sock_desc) {
             }
             char *m=verif_lenght(nb,3);
             printf("m %s",m);
-            char mess[4+1+4];//3 marhe pas ???
+            char mess[4+1+4];
             strcpy(mess,message);
             strcat(mess," ");
             strcat(mess,m);
             send(so,mess,4+1+3,0);
-            char recu[5];
+            char recu[4+4+SIZE_ID+SIZE_MESS+3];
             int taille_rec=recv(so,recu,5,0);
             recu[taille_rec]='\0';
             while (strstr(recu,"ENDM")==NULL){
@@ -151,34 +152,22 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
     mreq.imr_interface.s_addr=htonl(INADDR_ANY);
 
     r=setsockopt(sock,IPPROTO_IP,IP_ADD_MEMBERSHIP,&mreq,sizeof(mreq));
-
-    //si on veut envoyer un message a l'emetteur (aka diffuseur) MAIS JE CROIS PAS BESOIN 
-    struct sockaddr_in emet;
-    socklen_t a=sizeof(emet);
    
-
     if(r==0){    
         struct sockaddr_in adress_sock2;
         adress_sock2.sin_family = AF_INET;
-        adress_sock2.sin_port = htons(5757);//5757
-        inet_aton("127.0.0.1",&adress_sock2.sin_addr);//"127.0.0.1"
+        adress_sock2.sin_port = htons(atoi(port2));//5757
+        inet_aton(ip2,&adress_sock2.sin_addr);//"127.0.0.1"
   
         int descr=socket(PF_INET,SOCK_STREAM,0);
         int r2=connect(descr,(struct sockaddr *)&adress_sock2,
                 sizeof(struct sockaddr_in));
 
         if(r2!=-1){
-            char *mess="SALUT!\n";
-            send(descr,mess,strlen(mess),0);
             pthread_t thread;
-            thread_arg t;
-            t.id=id;
-            printf("id dans struct %s\n",t.id);
-            t.sock=&descr;
-
-            pthread_create(&thread,NULL,sendMessage,&t);
+            pthread_create(&thread,NULL,sendMessage,&descr);
         }else{
-            printf("rater");
+            printf("error thread");
         }
         while(1){
             char mess_recu[SIZE_MESS+4+8+4+3+1]; //+3 pour les espaces +1 pour '\0'
@@ -188,19 +177,14 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
         }
 
     }
-
-
 }
-
-
-
 
 int main(int argc, char**argv){
     if(argc != 2){
         printf("Erreur il faut fournir un numero de port puis un pseudo ! ");
         return 0;
     }
-    char *id=verif_lenght(argv[1],SIZE_ID);
+    ID=verif_lenght(argv[1],SIZE_ID);
     //printf("id : %s",id);
 
     //connection gestionnaire en mode TCP qui rempli une struture pour sauvegarde 
@@ -208,8 +192,8 @@ int main(int argc, char**argv){
 
 
     //diffu diffuseur=connection_gestionnaire(argv[1]);
-    printf("id %s",id);
-    connection_diffuseur("3434","225.1.2.4","5757","127.0.0.1",id);//port et  addresse issue de la structure  PAS SURE 
+    printf("id %s",ID);
+    connection_diffuseur("3434","225.1.2.4","5757","127.0.0.1",ID);//port et  addresse issue de la structure  PAS SURE 
 
 
 
