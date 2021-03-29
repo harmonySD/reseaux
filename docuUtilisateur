@@ -32,8 +32,14 @@ a part de la fonction connection gestionnaire.
 
 __fonction verif_lenght(char *str, int size)
 Verifie que la taille de str soit bien egal a size. 
-Si elle est plus petite alors, combler avec des #.
+Si elle est plus petite alors, combler avec des #.APRES 
 Si elle est trop grande, on ne garde que les size premiers characteres.
+
+__fonction verif_lenght_nb(char *str, int size)
+Verifie que la taille de str soit bien egal a size. 
+Si elle est plus petite alors, combler avec des 0. AVANT 
+Si elle est trop grande, on dira que l'utilisateur veut enfaite les 999 derniersmessages.
+
 
 __fonction sendMessage(void * sockdesc)
 Envoie des messages de l'utilisateur en tcp au diffuseur.
@@ -48,3 +54,6 @@ la fonction sendMessage (donc peut demander l'envoie de message ou d'historique)
 
 __fonction connexion_gestionnaire 
 renvoie les caracteristiques d'un diffuseur
+
+__Lancer 
+./utilisateur "num_port" "ident"
