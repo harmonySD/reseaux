@@ -78,12 +78,10 @@ char *verif_lenght(char *str, int size){
 
 void *sendMessage(void *sock_desc) {
     int so=*((int *) sock_desc);
-    send(so,"atchoum",strlen("atchoum"),0);
     while (1) {
         char message[4];
         scanf("%[^\n]%*c", message);
         fflush(stdin);
-        send(so,"atc",strlen("atc"),0);
         if(strstr(message,"MESS")){
             char messAenv[SIZE_MESS];
             printf("%s","entree votre message d'au plus 140 characteres: ");
@@ -98,7 +96,7 @@ void *sendMessage(void *sock_desc) {
             strcat(mess,m);
             int o=send(so,mess,SIZE_ID+4+2+SIZE_MESS,0);
             if(o<0){
-                printf("o =%d\n",o);
+                printf("send =%d\n",o);
                 printf("%s\n", strerror(errno));
             }
             printf("mess :%s\n",mess);
@@ -171,7 +169,7 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
         }
         while(1){
             char mess_recu[SIZE_MESS+4+8+4+3+1]; //+3 pour les espaces +1 pour '\0'
-            int rec=recvfrom(sock,mess_recu,SIZE_MESS+4+8+4+3,0,(struct sockaddr *)&emet,&a);
+            int rec=recv(sock,mess_recu,SIZE_MESS+4+8+4+3,0);
             mess_recu[rec]='\0';
             printf("Message recu :%s\n",mess_recu);
         }
