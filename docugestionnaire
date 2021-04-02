@@ -5,7 +5,7 @@ ___Idée générale
 Cette classe rassemble 
 tout ce qui est nécessaire pour former un gestionnaire,
 entité réseau qui a une liste de diffuseur, qu'il met à jour
-si nécessaire. Et qui peut donner des infomartion sur des diffuseurs à la demande d'un utilisateur
+si nécessaire. Et qui peut donner des infomartions sur des diffuseurs à la demande d'un utilisateur
 
 ___Dépendances__
 
@@ -48,5 +48,13 @@ ___Champs de la structure d'un diffuseur
 
 ___fonctions
 
-*  
+*  main : appel la fonction choix avec le port donné lors du lancement du programme
+
+*  choix(int p) : crée la socket et lance les thread sur la fonction choixDiscussion
+
+*  choixDiscussion(void *arg) : fonction du thread, attend un message et en fonction du message va appeler les fonctions qui communiquent soit avec le diffuseur soit avec le client
+
+*  actionDiffuseur(int sock, char *newDiffu) : enregistre le diffuseur (newDiffu) dans annuaire
+
+*  recvClient(int sock) : envoie la liste des diffuseurs de l'annuaire au client
 
