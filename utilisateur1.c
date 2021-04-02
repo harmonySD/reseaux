@@ -9,22 +9,29 @@
 #include <errno.h>
 #include <pthread.h>
 
+
+int BSLASH=1;
+int FIN=2;
 int SIZE_ID=8;
 int SIZE_MESS=140;
+int ESP=1;
+int PORT=4;
+int NBMESS=3;
+int IP=15;
+int NUMMESS=4;
+int NUMDIFF=2;
+int  SM=4;
 char *ID;
-/* un client se connecte a un gestionnaire 
-choisit son diffuseuer
-se connecte au diffuseur 
-interragit avec le diffuseur 
-recoit les multicast (aka udp etc)
-envoie des messages en TCP */
 
 
 typedef struct{
-    char port1[4];
-    char ip1[15];
-    char port2[4];
-    char ip2[15];
+    char id[9];
+    char ip1[16];
+    char port1[5];
+    char ip2[16];
+    char port2[5];
+
+    
 }diffu;
 
 char *verif_lenght(char *str, int size){
@@ -67,7 +74,7 @@ char *verif_lenght_nb(char *str, int size){
     return nb;
 
 }
-/*diffu connection_gestionnaire(char *argv){ 
+diffu connection_gestionnaire(char *argv){ 
     int p=atoi(argv);
     struct sockaddr_in adress_sock;
     adress_sock.sin_family = AF_INET;
@@ -76,37 +83,80 @@ char *verif_lenght_nb(char *str, int size){
     int descr = socket(PF_INET,SOCK_STREAM,0);
     int r = connect(descr, (struct sockaddr *)&adress_sock,
                     sizeof(struct sockaddr_in));
-    if(r !=1){
-        int s=send(descr,"LIST",4,0);
+    if(r != 1){
+        int s = send(descr,"LIST\r\n",SM+FIN,0);
         if(s<0){
             printf("%s\n", strerror(errno));
         }
-        char rec[4+1+2];
-        int taille_recu=recv(descr,rec,4+1+2,0);
+        sleep(4);
+        char rec[SM+ESP+NUMDIFF+FIN+BSLASH];
+        int taille_recu=recv(descr,rec,SM+ESP+NUMDIFF+FIN,0);
         rec[taille_recu]='\0';
         //recuperer num_diff
         char *nbstr= strtok(rec,"LINB ");
         int nb=atoi(nbstr);
         diffu tab[nb];
-        for(int i=0; i<nb; i++){
+        int i=0;
+        for(i=0; i<nb;i++){
             //remplir le tableau 
+            char rec[SM+ESP+SIZE_ID+ESP+IP+ESP+PORT+ESP+IP+ESP+PORT+FIN+BSLASH];
+            int t_recu=recv(descr,rec,SM+ESP+SIZE_ID+ESP+IP+ESP+PORT+ESP+IP+ESP+PORT+FIN,0);
+            rec[t_recu]='\0';
+            // char *sep="ITEM ";
+            // char *tok=strtok(rec,sep);
+            // memcpy(tab[i].id,tok,SIZE_ID+1);
+            // tok=strtok(NULL," ");
+            // memcpy(tab[i].ip1,tok,IP+1);
+            // tok=strtok(NULL," ");
+            // memcpy(tab[i].port1,tok,PORT+1);
+            // printf("port %s",tok);
+            // printf("port struct %s",tab[i].port1);
+            // tok=strtok(NULL," ");
+            // memcpy(tab[i].ip2,tok,IP+1);
+            // tok=strtok(NULL,"\r");
+            // printf("port %s pppp",tok);
+
+            // memcpy(tab[i].port2,tok,PORT+1);
+            // printf("port struct %s\n",tab[i].port2);
+
+            char * pch;
+            int j=0;
+            pch = strtok (rec,"ITEM ");
+            while (pch != NULL)
+            {
+                if(j==0){
+                    memcpy(tab[i].id,pch,SIZE_ID+1);
+                    pch = strtok (NULL, " \r\n");
+                }else if(j==1){
+                    memcpy(tab[i].ip1,pch,IP+1);
+                    pch = strtok (NULL, " \r\n");
+                }else if(j==2){
+                    memcpy(tab[i].port1,pch,PORT+1);
+                    pch = strtok (NULL, " \r\n");
+                }else if(j==3){
+                    memcpy(tab[i].ip2,pch,IP+1);
+                    pch = strtok (NULL, " \r\n");
+                }else if(j==4){
+                    memcpy(tab[i].port2,pch,PORT+1);
+                    pch = strtok (NULL, " \r\n");
+                }
+                j++;  
+            }
         }
-        //choix nb alea 
-
-
-        // envoie message LIST 
-        // doit recevoir  LINB num_diff 
-        // creer tableau de taille num diff  de structure diffu 
-        // puis boucle sur num_diff 
-        //     recoit le message enregistre dans la structure 
-        //     dans le tableau mettre la structure a la position i 
-        // fin boucle 
-        // choisir un nb aleatoire 
-        // prendre le diffu a cette place 
-        // renvoyer le diffu 
-        
-    }
-}*/
+        srand(time(NULL));
+        int pos=rand()%i;
+        diffu choix_diffu;
+        memmove(&choix_diffu,&tab[pos],sizeof(diffu));
+        return choix_diffu;        
+    } 
+    diffu choix_diffu;
+    strncpy(choix_diffu.id,"",SIZE_ID);
+    strncpy(choix_diffu.ip1,"",IP);
+    strncpy(choix_diffu.port1,"",PORT);
+    strncpy(choix_diffu.ip2,"",IP);
+    strncpy(choix_diffu.port2,"",PORT);
+    return choix_diffu;
+}
 
 
 void *sendMessage(void *sock_desc) {
@@ -161,7 +211,7 @@ void *sendMessage(void *sock_desc) {
             recu[taille_rec]='\0';
             while (strstr(recu,"ENDM")==NULL){
                 printf("message de l'historique :%s\n",recu);
-                int taille_rec=recv(so,recu,5,0);
+                int taille_rec=recv(so,recu,4+4+SIZE_ID+SIZE_MESS+3,0);
                 recu[taille_rec]='\0';
             }
         }
@@ -223,10 +273,14 @@ int main(int argc, char**argv){
     //le port et l'adress ip choisit 
 
 
-   // diffu diffuseur=connection_gestionnaire(argv[1]);
+    diffu diffuseur=connection_gestionnaire(argv[1]);
+    printf("port1 %s\n",diffuseur.port1);
+    printf("ip1 %s\n",diffuseur.ip1);
+    printf("ip2 %s\n",diffuseur.ip2);
+    printf("port2 %s\n",diffuseur.port2);
     printf("id %s",ID);
-    connection_diffuseur("3434","225.1.2.4","5757","127.0.0.1",ID);//port et  addresse issue de la structure  PAS SURE 
-
+   // connection_diffuseur("3434","225.1.2.4","5757","127.0.0.1",ID);//port et  addresse issue de la structure  PAS SURE 
+   // connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID);
 
 
 
