@@ -20,22 +20,25 @@ port1 ou port2  4 octets chaîne de caractères correspondant à un numéro de p
 num-diff 2 octets contient une chaîne de caractères correspondant au nombre de diffuseurs. S
 
 ___Liste des messages que peut envoyer le gestionnaire 
-* "REOK" 
-* "RENO"
-* "RUOK"
-* "LINB␣num-diff"
-* "ITEM␣id␣ip1␣port1␣ip2␣port2" 
+* "REOK" : enregistrement diffuseur OK
+* "RENO" : enregistrement du diffuseur non OK
+* "RUOK" : demande si diffuseur toujours actif
+* "LINB␣num-diff" : envoie nombre de diffuseur enregistrer dans annuaire
+* "ITEM␣id␣ip1␣port1␣ip2␣port2" : envoie la description d'un diffuseur a un client
 
 ___Liste des messages que peut recevoir le diffuseur
-* "REGI␣id␣ip1␣port1␣ip2␣port2"
-* "IMOK"
-* "LIST"
+* "REGI␣id␣ip1␣port1␣ip2␣port2" : description d'un diffuseur pour l'inscrire dans l'annuaire
+* "IMOK" : diffuseur toujours actif
+* "LIST" : demande liste des diffuseurs de l'annuaire par un client
 
-___Champs de la structure du gestionnaire 
-* "port" chaine de caractere, port de communication, 
-déterminé une fois pour toutes au lancement du gestionnaire
+___Champs global 
+* SIZE_FORME=4 : LIST, REGI, RUOK, ...
+* SIZE_PORT=4 : taille d'un port
+* SIZE_ID=8 : taille d'un identifiant
+* SIZE_IP=15 : taille d'une adresse ip (ipv4)
+* SIZE_MESS=140 : taille d'un message 
 * "annuaire" liste de diffuseur, liste de diffuseur, nombre max de diffuseur : 100
-* diffprt entier, port de diffusion sur lequel émet broadcastloop
+* nbDiffu=0 : nombre de diffuseur enregistrer dans annuaire
 
 ___Champs de la structure d'un diffuseur
 * "id" 
@@ -52,7 +55,7 @@ ___fonctions
 
 *  choix(int p) : crée la socket et lance les thread sur la fonction choixDiscussion
 
-*  choixDiscussion(void *arg) : fonction du thread, attend un message et en fonction du message va appeler les fonctions qui communiquent soit avec le diffuseur soit avec le client
+*  choixDiscussion(void *arg) : fonction du thread, attend un message (type LIST ou type REGI ...) et en fonction du message va appeler les fonctions qui communiquent soit avec le diffuseur soit avec le client
 
 *  actionDiffuseur(int sock, char *newDiffu) : enregistre le diffuseur (newDiffu) dans annuaire
 
