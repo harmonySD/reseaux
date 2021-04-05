@@ -1,0 +1,63 @@
+Classe Gestionnaire
+
+
+___Idée générale 
+Cette classe rassemble 
+tout ce qui est nécessaire pour former un gestionnaire,
+entité réseau qui a une liste de diffuseur, qu'il met à jour
+si nécessaire. Et qui peut donner des infomartions sur des diffuseurs à la demande d'un utilisateur
+
+___Dépendances__
+
+
+RAPPEL
+num-mess 4 octets chaîne de caractères correspondant à un nombre, numéro d'un message
+id  8 octets  chaîne de caractères quelconques pour identifier client et diffuseur.
+mess 140 octets  chaîne de caractères quelconques, contenu d'un message. 
+nb-mess 3 octets chaîne de caractères correspondant au nombre de messages. 
+ip1 ou ip2 15  octets chaîne  de  caractères  correspondant  à une adresse IPv4. 
+port1 ou port2  4 octets chaîne de caractères correspondant à un numéro de port.
+num-diff 2 octets contient une chaîne de caractères correspondant au nombre de diffuseurs. S
+
+___Liste des messages que peut envoyer le gestionnaire 
+* "REOK" : enregistrement diffuseur OK
+* "RENO" : enregistrement du diffuseur non OK
+* "RUOK" : demande si diffuseur toujours actif
+* "LINB␣num-diff" : envoie nombre de diffuseur enregistrer dans annuaire
+* "ITEM␣id␣ip1␣port1␣ip2␣port2" : envoie la description d'un diffuseur a un client
+
+___Liste des messages que peut recevoir le diffuseur
+* "REGI␣id␣ip1␣port1␣ip2␣port2" : description d'un diffuseur pour l'inscrire dans l'annuaire
+* "IMOK" : diffuseur toujours actif
+* "LIST" : demande liste des diffuseurs de l'annuaire par un client
+
+___Champs global 
+* SIZE_FORME=4 : LIST, REGI, RUOK, ...
+* SIZE_PORT=4 : taille d'un port
+* SIZE_ID=8 : taille d'un identifiant
+* SIZE_IP=15 : taille d'une adresse ip (ipv4)
+* SIZE_MESS=140 : taille d'un message 
+* "annuaire" liste de diffuseur, liste de diffuseur, nombre max de diffuseur : 100
+* nbDiffu=0 : nombre de diffuseur enregistrer dans annuaire
+
+___Champs de la structure d'un diffuseur
+* "id" 
+* "ip1" , adresse IPV4 de multi-diffusion
+* "port1" , port de multi-diffusion
+* "ip2" , adresse IPV4 de la machine
+* "port2" , port de réception des messages d'utilisateur
+
+***
+
+___fonctions
+
+*  main : appel la fonction choix avec le port donné lors du lancement du programme
+
+*  choix(int p) : crée la socket et lance les thread sur la fonction choixDiscussion
+
+*  choixDiscussion(void *arg) : fonction du thread, attend un message (type LIST ou type REGI ...) et en fonction du message va appeler les fonctions qui communiquent soit avec le diffuseur soit avec le client
+
+*  actionDiffuseur(int sock, char *newDiffu) : enregistre le diffuseur (newDiffu) dans annuaire
+
+*  recvClient(int sock) : envoie la liste des diffuseurs de l'annuaire au client
+
