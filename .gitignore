@@ -1,0 +1,23 @@
+# Compiled source #
+*.o
+
+
+# Packages #
+*.jar
+
+*.lst
+
+# Logs and databases #
+*.log
+
+# Directories #
+*target
+
+# Intelij Idea #
+.idea/
+out/
+*.iml
+
+# Eclipse #
+.settings/
+bin/
