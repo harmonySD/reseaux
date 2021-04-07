@@ -1,37 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <time.h>
-#include <errno.h>
-#include <pthread.h>
+#include "utilisateur.h"
+#include "gestionnaire.h"
 
-
-int BSLASH = 1;
-int FIN = 2;
-int SIZE_ID = 8;
-int SIZE_MESS = 140;
-int ESP = 1;
-int PORT = 4;
-int NBMESS = 3;
-int IP = 15;
-int NUMMESS = 4;
-int NUMDIFF = 2;
-int  SM = 4;
 char *ID;
-
-
-typedef struct{
-    char id[9];
-    char ip1[16];
-    char port1[5];
-    char ip2[16];
-    char port2[5];    
-}diffu;
-
 
 char *verif_lenght(char *str, int size){
     char *final_str = str; 
@@ -78,7 +48,7 @@ char *verif_lenght_nb(char *str, int size){
 }
 
 
-diffu connection_gestionnaire(char *argv){ 
+diffuseur connection_gestionnaire(char *argv){ 
     int p = atoi(argv);
     struct sockaddr_in adress_sock;
     adress_sock.sin_family = AF_INET;
@@ -98,14 +68,14 @@ diffu connection_gestionnaire(char *argv){
         //get num_diff
         char *nbstr = strtok(rec, "LINB ");
         int nb = atoi(nbstr);
-        diffu tab[nb];
+        diffuseur tab[nb];
         int i = 0;
         for(i = 0; i < nb; i++){
-            //fill the array of diffu 
-            char rec[SM + ESP + SIZE_ID + ESP + IP + ESP + PORT + ESP+ IP 
-                    + ESP + PORT + FIN + BSLASH];
-            int t_recu = recv(descr, rec, SM + ESP + SIZE_ID + ESP + IP + ESP + 
-                                PORT + ESP + IP + ESP + PORT + FIN, 0);
+            //fill the array of diffuseur 
+            char rec[SM + ESP + SIZE_ID + ESP + SIZE_IP + ESP + SIZE_PORT + ESP+ SIZE_IP 
+                    + ESP + SIZE_PORT + FIN + BSLASH];
+            int t_recu = recv(descr, rec, SM + ESP + SIZE_ID + ESP + SIZE_IP + ESP + 
+                                SIZE_PORT + ESP + SIZE_IP + ESP + SIZE_PORT + FIN, 0);
             rec[t_recu] = '\0';
             // char *sep="ITEM ";
             // char *tok=strtok(rec,sep);
@@ -133,16 +103,16 @@ diffu connection_gestionnaire(char *argv){
                     memcpy(tab[i].id,tok,SIZE_ID+1);
                     tok = strtok (NULL, " \r\n");
                 }else if(j == 1){
-                    memcpy(tab[i].ip1,tok,IP+1);
+                    memcpy(tab[i].ip1,tok,SIZE_IP+1);
                     tok = strtok (NULL, " \r\n");
                 }else if(j == 2){
-                    memcpy(tab[i].port1,tok,PORT+1);
+                    memcpy(tab[i].port1,tok,SIZE_PORT+1);
                     tok = strtok (NULL, " \r\n");
                 }else if(j == 3){
-                    memcpy(tab[i].ip2,tok,IP+1);
+                    memcpy(tab[i].ip2,tok,SIZE_IP+1);
                     tok = strtok (NULL, " \r\n");
                 }else if(j == 4){
-                    memcpy(tab[i].port2,tok,PORT+1);
+                    memcpy(tab[i].port2,tok,SIZE_PORT+1);
                     tok = strtok (NULL, " \r\n");
                 }
                 j++;  
@@ -150,18 +120,18 @@ diffu connection_gestionnaire(char *argv){
         }
         srand(time(NULL));
         int pos=rand()%i;
-        diffu choix_diffu;
-        memmove(&choix_diffu,&tab[pos],sizeof(diffu));
-        return choix_diffu;        
+        diffuseur choix_diffuseur;
+        memmove(&choix_diffuseur,&tab[pos],sizeof(diffuseur));
+        return choix_diffuseur;        
     } 
     //no diffuseur 
-    diffu choix_diffu;
-    strncpy(choix_diffu.id,"",SIZE_ID);
-    strncpy(choix_diffu.ip1,"",IP);
-    strncpy(choix_diffu.port1,"",PORT);
-    strncpy(choix_diffu.ip2,"",IP);
-    strncpy(choix_diffu.port2,"",PORT);
-    return choix_diffu;
+    diffuseur choix_diffuseur;
+    strncpy(choix_diffuseur.id,"",SIZE_ID);
+    strncpy(choix_diffuseur.ip1,"",SIZE_IP);
+    strncpy(choix_diffuseur.port1,"",SIZE_PORT);
+    strncpy(choix_diffuseur.ip2,"",SIZE_IP);
+    strncpy(choix_diffuseur.port2,"",SIZE_PORT);
+    return choix_diffuseur;
 }
 
 
@@ -285,7 +255,7 @@ int main(int argc, char**argv){
     //le port et l'adress ip choisit 
 
 
-    diffu diffuseur=connection_gestionnaire(argv[1]);
+    diffuseur diffuseur=connection_gestionnaire(argv[1]);
     // printf("port1 %s\n",diffuseur.port1);
     // printf("ip1 %s\n",diffuseur.ip1);
     // printf("ip2 %s\n",diffuseur.ip2);

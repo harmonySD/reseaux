@@ -9,26 +9,13 @@
 #include <errno.h>
 #include <pthread.h>
 
+#include "utilisateur.h"
+
 #ifndef GESTIONNAIRE_H
 #define GESTIONNAIRE_H
 
-typedef struct{
-    char id[9];
-    char ip1[16];
-    char port1[5];
-    char ip2[16];
-    char port2[5];
-}diffuseur;
-
-int SIZE_FORME=4;
-int SIZE_PORT=4;
-int SIZE_ID=8;
-int SIZE_IP=15;
-int SIZE_MESS=140;
-
 extern void printDiffu(diffuseur diffu);
 extern void printAnnuraire();
-extern char *verif_lenght_nb(char *str, int size);
 extern void recvClient(int sock);
 extern void actionDiffuseur(int sock,char *newDiffu);
 extern void *choixDiscussion(void *arg);

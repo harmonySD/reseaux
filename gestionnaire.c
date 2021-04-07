@@ -1,5 +1,5 @@
 #include "gestionnaire.h"
-#include <pthread.h>
+#include "utilisateur.h"
 
 
 // gcc -Wall -pthread -o gestio gestionnaire.c
