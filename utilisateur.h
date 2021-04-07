@@ -8,6 +8,7 @@
 #include <time.h>
 #include <errno.h>
 #include <pthread.h>
+#include <fcntl.h>
 
 #ifndef UTILISATEUR_H
 #define UTILISATEUR_H
@@ -37,6 +38,6 @@ extern char *verif_lenght(char *str, int size);
 extern char *verif_lenght_nb(char *str, int size);
 extern diffuseur connection_gestionnaire(char *argv);
 extern void *sendMessage(void *sock_desc);
-extern void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *id);
+extern void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *id, char *tty);
 
 #endif
