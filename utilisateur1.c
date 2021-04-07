@@ -233,7 +233,6 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
             printf("error thread");
         }
         while(1){
-            printf("tty ici %s",tty);
             int fd = open(tty,O_RDWR);
             char mess_recu[SM + ESP + NUMMESS + ESP + SIZE_ID + ESP 
                     + SIZE_MESS + FIN + BSLASH]; 
@@ -265,8 +264,10 @@ int main(int argc, char**argv){
     // printf("ip2 %s\n",diffuseur.ip2);
     // printf("port2 %s\n",diffuseur.port2);
     // printf("id %s",ID);
-
-    connection_diffuseur("5151","225.10.20.30","5252","127.0.0.1",ID,TTY);//port et  addresse issue de la structure  PAS SURE 
+    printf("**********UTILISATEUR**********\n");
+    printf("Id: %s\n",ID);
+    printf("*******************************\n");
+    connection_diffuseur("5656","225.10.20.30","5454","127.0.0.1",ID,TTY);//port et  addresse issue de la structure  PAS SURE 
     //connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID);
 
 
