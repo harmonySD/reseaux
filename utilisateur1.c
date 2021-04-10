@@ -2,7 +2,7 @@
 #include "gestionnaire.h"
 
 char *ID;
-
+char *TTY;
 char *verif_lenght(char *str, int size){
     char *final_str = str; 
     int size_str = strlen(str);
@@ -200,7 +200,7 @@ void *sendMessage(void *sock_desc) {
 }
 
 
-void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *id){
+void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *id, char *tty){
     int sock = socket(PF_INET, SOCK_DGRAM, 0);
     int ok = 1;
     int r = setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &ok, sizeof(ok));
@@ -233,37 +233,42 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
             printf("error thread");
         }
         while(1){
+            int fd = open(tty,O_RDWR);
             char mess_recu[SM + ESP + NUMMESS + ESP + SIZE_ID + ESP 
                     + SIZE_MESS + FIN + BSLASH]; 
             int rec = recv(sock, mess_recu, SM + ESP + NUMMESS + ESP 
                     + SIZE_ID + ESP + SIZE_MESS + FIN, 0);
             mess_recu[rec] = '\0';
-            printf("Message recu :%s\n", mess_recu);
+            //printf("Message recu :%s\n", mess_recu);
+            write(fd,mess_recu,SM + ESP + NUMMESS + ESP + SIZE_ID + ESP 
+                    + SIZE_MESS + FIN + BSLASH);
         }
     }
 }
 
 
 int main(int argc, char**argv){
-    if(argc != 3){
-        printf("Erreur il faut fournir un numero de port puis un pseudo ! ");
+    if(argc != 4){
+        printf("Erreur il faut fournir un numero de port et le tty d'un terminale et le pseudo ! ");
         return 0;
     }
-    ID=verif_lenght(argv[2], SIZE_ID);
-
+    TTY = argv[2];
+    ID = verif_lenght(argv[3], SIZE_ID);
     //connection gestionnaire en mode TCP qui rempli une struture pour sauvegarde 
     //le port et l'adress ip choisit 
 
 
-    diffuseur diffuseur=connection_gestionnaire(argv[1]);
+    //diffuseur diffuseur=connection_gestionnaire(argv[1]);
     // printf("port1 %s\n",diffuseur.port1);
     // printf("ip1 %s\n",diffuseur.ip1);
     // printf("ip2 %s\n",diffuseur.ip2);
     // printf("port2 %s\n",diffuseur.port2);
     // printf("id %s",ID);
-
-   // connection_diffuseur("3434","225.1.2.4","5757","127.0.0.1",ID);//port et  addresse issue de la structure  PAS SURE 
-    connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID);
+    printf("**********UTILISATEUR**********\n");
+    printf("Id: %s\n",ID);
+    printf("*******************************\n");
+    connection_diffuseur("5656","225.10.20.30","5454","127.0.0.1",ID,TTY);//port et  addresse issue de la structure  PAS SURE 
+    //connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID);
 
 
 
