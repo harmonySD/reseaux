@@ -21,18 +21,18 @@ typedef struct{
     char port2[5];
 }diffuseur;
 
-int BSLASH = 1;
-int FIN = 2;
-int NBMESS = 3;
-int NUMMESS = 4;
-int NUMDIFF = 2;
-int  SM = 4;
-int SIZE_FORME=4;
-int SIZE_PORT=4;
-int SIZE_ID=8;
-int SIZE_IP=15;
-int SIZE_MESS=140;
-int ESP = 1;
+#define BSLASH 1
+#define FIN 2
+#define NBMESS 3
+#define NUMMESS 4
+#define NUMDIFF 2
+#define  SM 4
+#define SIZE_FORME 4
+#define SIZE_PORT 4
+#define SIZE_ID 8
+#define SIZE_IP 15
+#define SIZE_MESS 140
+#define ESP 1
 
 extern char *verif_lenght(char *str, int size);
 extern char *verif_lenght_nb(char *str, int size);
