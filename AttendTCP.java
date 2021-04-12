@@ -5,30 +5,30 @@ import java.util.Scanner;
 
 public class AttendTCP extends Thread{
     // tailles fixée des données / nom utilisateur
-	public static final int idsz=8;
-    public static final int datasz=140;
+	public static final int idsz = 8;
+    public static final int datasz = 140;
     
     int port; 
     String add;
     String pseudo;
     public AttendTCP(int p, String a, String pseu){
-        port=p;
-        add=a;
-        pseudo=pseu;
+        port = p;
+        add = a;
+        pseudo = pseu;
     }
 
     public String completeIfNeeded(String src, int wantedsz){
         int manytofill = wantedsz - src.length();
-        if(manytofill>0){
+        if(manytofill > 0){
           return src + "#".repeat(manytofill);  
         }
         return src;
     }
     public String completenbIfNeeded(String src, int wantedsz){
         int manytofill = wantedsz - src.length();
-        if(manytofill>0){
-            return "0".repeat(manytofill)+src;
-        }else if (manytofill<0){
+        if(manytofill > 0){
+            return "0".repeat(manytofill) + src;
+        }else if (manytofill < 0){
             return "999";
         }
         return src;
@@ -37,13 +37,13 @@ public class AttendTCP extends Thread{
 
 
     public void run(){
-        try{
-            Scanner sc = new Scanner(System.in);
-            Socket cs= new Socket(add,port);
+        try(Socket cs = new Socket(add,port);
             //envoie
             PrintWriter out = new PrintWriter(cs.getOutputStream());
-            //recoit
-            BufferedReader in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
+             //recoit
+             BufferedReader in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
+        ){
+            Scanner sc = new Scanner(System.in);
             String msg;
             while(true){
                 //envoie
@@ -52,8 +52,8 @@ public class AttendTCP extends Thread{
                     String menv;
                     System.out.println("Entrer votre message : ");
                     msg = sc.nextLine();
-                    msg= completeIfNeeded(msg, datasz);
-                    menv="MESS "+pseudo+" "+msg+"\r\n";
+                    msg = completeIfNeeded(msg, datasz);
+                    menv = "MESS " + pseudo + " " + msg + "\r\n";
                     out.print(menv);
                     out.flush();
                     //recoit
@@ -66,9 +66,9 @@ public class AttendTCP extends Thread{
                 }
                 else if(msg.equals("LAST")){
                     System.out.println("afficher combien de messages :");
-                    msg=sc.nextLine();
-                    msg=completenbIfNeeded(msg, 3);
-                    String menv ="LAST "+msg+"\r\n";
+                    msg = sc.nextLine();
+                    msg = completenbIfNeeded(msg, 3);
+                    String menv = "LAST " + msg + "\r\n";
                     out.print(menv);
                     out.flush();
                     //recoit
@@ -83,10 +83,6 @@ public class AttendTCP extends Thread{
                 }
                 
             }
-            //out.close();
-            //in.close();
-            //cs.close();
-
         } catch (Exception e){
             e.printStackTrace();
         }

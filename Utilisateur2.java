@@ -12,18 +12,18 @@ public class Utilisateur2{
 
     public static void main(String[] args){
         //recuperer pseudo port add
-        String add=args[0];
-        int porttcp=Integer.parseInt(args[1]);
-        String addm=args[2];
-        int portudp=Integer.parseInt(args[3]);
-        String pseudo=completeIfNeeded(args[4],8);
+        String add = args[0];
+        int porttcp = Integer.parseInt(args[1]);
+        String addm = args[2];
+        int portudp = Integer.parseInt(args[3]);
+        String pseudo = completeIfNeeded(args[4],8);
 
         try{
             System.out.println("*********UTILISATER2*********\r\n"+
                                 "Id : "+pseudo+"\r\n"+
                                 "******************************");
-            AttendUDP audp= new AttendUDP(portudp,addm);
-            AttendTCP atcp= new AttendTCP(porttcp, add,pseudo);
+            AttendUDP audp = new AttendUDP(portudp,addm);
+            AttendTCP atcp = new AttendTCP(porttcp, add, pseudo);
             audp.start();
             atcp.start();
         } catch (Exception e){
