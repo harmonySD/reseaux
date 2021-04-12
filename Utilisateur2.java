@@ -29,8 +29,5 @@ public class Utilisateur2{
         } catch (Exception e){
             e.printStackTrace();
         }
-
-
-
     }
 }
