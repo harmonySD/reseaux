@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 
 public class Utilisateur2{
     public static String completeIfNeeded(String src, int wantedsz){
@@ -11,21 +12,32 @@ public class Utilisateur2{
     }
 
     public static void main(String[] args){
-        //recuperer pseudo port add
         String add = args[0];
         int porttcp = Integer.parseInt(args[1]);
         String addm = args[2];
         int portudp = Integer.parseInt(args[3]);
         String pseudo = completeIfNeeded(args[4],8);
+        Scanner sc=new Scanner(System.in);
 
         try{
-            System.out.println("*********UTILISATER2*********\r\n"+
-                                "Id : "+pseudo+"\r\n"+
-                                "******************************");
-            AttendUDP audp = new AttendUDP(portudp,addm);
-            AttendTCP atcp = new AttendTCP(porttcp, add, pseudo);
-            audp.start();
-            atcp.start();
+            while(true){
+                System.out.println("diffuseur ou gestionnaire");
+                String choix = sc.nextLine();
+                if(choix.equals("diffuseur")){
+                    System.out.println("*********UTILISATER2*********\r\n"+
+                                        "Id : "+pseudo+"\r\n"+
+                                        "******************************");
+                    AttendUDP audp = new AttendUDP(portudp,addm);
+                    AttendTCP atcp = new AttendTCP(porttcp, add, pseudo);
+                    audp.start();
+                    atcp.start();
+                    while(atcp.isAlive()){
+                    
+                    }
+                    audp.stops();
+                    System.out.println("grr");
+                }
+            }
         } catch (Exception e){
             e.printStackTrace();
         }

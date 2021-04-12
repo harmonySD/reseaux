@@ -1,4 +1,3 @@
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.awt.Color;
@@ -11,6 +10,8 @@ import javax.swing.text.DefaultCaret;
 public class AttendUDP extends Thread{
     int port;
     String add;
+    JFrame fenetre = new JFrame("les messages recu !");
+    JTextArea label2=new JTextArea();
     // tailles fixée des données / nom utilisateur
 	public static final int idsz = 8;
 	public static final int datasz = 140;
@@ -25,11 +26,8 @@ public class AttendUDP extends Thread{
             mso.joinGroup(InetAddress.getByName(add));
             byte[]data = new byte[4 + 1 + 4 + 1 + idsz + 1 + datasz + 2];
             DatagramPacket paquet = new DatagramPacket(data, data.length);
-            JFrame fenetre = new JFrame("les messages recu !");
             fenetre.setSize(500, 500);
-            fenetre.setVisible(true);
             fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            JTextArea label2=new JTextArea();
             label2.setEditable(false);
             label2.setBackground(Color.BLACK);
             label2.setForeground(Color.GREEN);
@@ -37,6 +35,7 @@ public class AttendUDP extends Thread{
             DefaultCaret caret = (DefaultCaret)label2.getCaret();
             caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             fenetre.add(scroll);
+            fenetre.setVisible(true);
             while(true){
                 mso.receive(paquet);
                 String st = new String(paquet.getData(),0,paquet.getLength());
@@ -47,5 +46,16 @@ public class AttendUDP extends Thread{
         catch (Exception e){
             e.printStackTrace();
         }
+    
+    }
+    
+    public void stops(){
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                fenetre.setVisible(false);
+                fenetre.dispose();
+                label2.setText(null);//vide le texte de la jtexte area
+            }
+        } );
     }
 }

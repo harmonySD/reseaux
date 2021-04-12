@@ -45,7 +45,8 @@ public class AttendTCP extends Thread{
         ){
             Scanner sc = new Scanner(System.in);
             String msg;
-            while(true){
+            boolean arret=false;
+            while(arret==false){
                 //envoie
                 msg = sc.nextLine();
                 if(msg.equals("MESS")){
@@ -80,6 +81,9 @@ public class AttendTCP extends Thread{
                     }
 
 
+                }
+                else if(msg.equals("q")){
+                    arret=true;
                 }
                 
             }
