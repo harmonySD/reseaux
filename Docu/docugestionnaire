@@ -17,7 +17,7 @@ mess 140 octets  chaîne de caractères quelconques, contenu d'un message.
 nb-mess 3 octets chaîne de caractères correspondant au nombre de messages. 
 ip1 ou ip2 15  octets chaîne  de  caractères  correspondant  à une adresse IPv4. 
 port1 ou port2  4 octets chaîne de caractères correspondant à un numéro de port.
-num-diff 2 octets contient une chaîne de caractères correspondant au nombre de diffuseurs. S
+num-diff 2 octets contient une chaîne de caractères correspondant au nombre de diffuseurs.
 
 ___Liste des messages que peut envoyer le gestionnaire 
 * "REOK" : enregistrement diffuseur OK
@@ -32,15 +32,15 @@ ___Liste des messages que peut recevoir le diffuseur
 * "LIST" : demande liste des diffuseurs de l'annuaire par un client
 
 ___Champs global 
-* SIZE_FORME=4 : LIST, REGI, RUOK, ...
-* SIZE_PORT=4 : taille d'un port
-* SIZE_ID=8 : taille d'un identifiant
-* SIZE_IP=15 : taille d'une adresse ip (ipv4)
-* SIZE_MESS=140 : taille d'un message 
-* "annuaire" liste de diffuseur, liste de diffuseur, nombre max de diffuseur : 100
+* SIZE_FORME=4 : LIST, REGI, RUOK, ... (dans utilisateur.h)
+* SIZE_PORT=4 : taille d'un port (dans utilisateur.h)
+* SIZE_ID=8 : taille d'un identifiant (dans utilisateur.h)
+* SIZE_IP=15 : taille d'une adresse ip (ipv4) (dans utilisateur.h)
+* SIZE_MESS=140 : taille d'un message (dans utilisateur.h)
+* annuaire liste de diffuseur, liste de diffuseur, nombre max de diffuseur : 100
 * nbDiffu=0 : nombre de diffuseur enregistrer dans annuaire
 
-___Champs de la structure d'un diffuseur
+___Champs de la structure d'un diffuseur (dans utilisateur.h)
 * "id" 
 * "ip1" , adresse IPV4 de multi-diffusion
 * "port1" , port de multi-diffusion
@@ -60,4 +60,9 @@ ___fonctions
 *  actionDiffuseur(int sock, char *newDiffu) : enregistre le diffuseur (newDiffu) dans annuaire
 
 *  recvClient(int sock) : envoie la liste des diffuseurs de l'annuaire au client
+
+* miseAJour(int sock,diffuseur *diffu) : envoie le message RUOK au diffuseur toutes les 30s, le diffuseur a ensuite 10s pour repondre IMOK, s'il ne repond pas ou repond autre enlever on lenleve de la liste
+
+* enleverDiffu(diffuseur *diffu) : parcours l'annuaire pour trouver le diffuseur a enlever (sous-entend que id est unique), puis lenleve en decalant les diffuseurs qui suivent dun cran, pour effacer le diffuseur donne en argument.
+
 

@@ -1,22 +1,23 @@
 CC=gcc
-CFLAGS=-Wall -g
+CFLAGS=-Wall -pthread
 LDLIBS=-lm
 
 ALL=gestio client
 
 all: $(ALL)
 
-client:utilisateur.o 
-	gcc -pthread -o client utilisateur.o
+utilisateur1.o: utilisateur1.c utilisateur.h
+	$(CC) $(CFLAGS) -c utilisateur1.c
 
-utilisateur.o: utilisateur1.c utilisateur.h
-	gcc -o utilisateur.o -c utilisateur1.c
+gestionnaire.o: gestionnaire.c gestionnaire.h
+	$(CC) $(CFLAGS) -c gestionnaire.c
+
+client:utilisateur.o 
+	$(CC) $(CFLAGS) utilisateur.o -o client
 
 gestio: gestionnaire.o 
-	gcc -pthread -o gestio gestionnaire.o
+	$(CC) $(CFLAGS) gestionnaire.o -o gestio
 
-gestionnaire.o: gestionnaire.c gestionnaire.h utilisateur.h
-	gcc -o gestionnaire.o -c gestionnaire.c
 
 
 cleanall :
