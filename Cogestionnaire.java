@@ -26,12 +26,12 @@ public class Cogestionnaire extends Thread{
             String mess = in.readLine();
             System.out.println(("recu "+mess));
             String nbstr=mess.substring(5, mess.length());
-            System.out.println(nbstr);
+            //System.out.println(nbstr);
             int nb = Integer.parseInt(nbstr);
             for(int i= 0; i< nb; i++){
                 String diff = in.readLine();
-                System.out.print((diff));
-                System.out.print("**********************/n");
+                System.out.println((diff));
+                System.out.print("**********************\n");
 
             }
 

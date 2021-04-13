@@ -24,6 +24,8 @@ public class Utilisateur2{
                 System.out.println("diffuseur ou gestionnaire");
                 String choix = sc.nextLine();
                 if(choix.equals("diffuseur")){
+                    //demander ip port etc
+                    // parser la reponse
                     System.out.println("*********UTILISATER2*********\r\n"+
                                         "Id : "+pseudo+"\r\n"+
                                         "******************************");
@@ -32,16 +34,15 @@ public class Utilisateur2{
                     audp.start();
                     atcp.start();
                     while(atcp.isAlive()){}
-
                     audp.stops();
                     System.out.println("grrr");
                 }
-                // else if(choix.equals("gestionnaire")){
-                //     System.out.println("port :");
-                //     choix = sc.nextLine();
-                //     Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(choix));
-                //     cg.start();
-                // }
+                else if(choix.equals("gestionnaire")){
+                    System.out.println("port :");
+                    choix = sc.nextLine();
+                    Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(choix));
+                    cg.start();
+                }
             }
         } catch (Exception e){
             e.printStackTrace();
