@@ -12,6 +12,7 @@ public class AttendUDP extends Thread{
     String add;
     JFrame fenetre = new JFrame("les messages recu !");
     JTextArea label2=new JTextArea();
+    boolean arret=false;
     // tailles fixée des données / nom utilisateur
 	public static final int idsz = 8;
 	public static final int datasz = 140;
@@ -36,11 +37,10 @@ public class AttendUDP extends Thread{
             caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             fenetre.add(scroll);
             fenetre.setVisible(true);
-            while(true){
+            while(arret==false){
                 mso.receive(paquet);
                 String st = new String(paquet.getData(),0,paquet.getLength());
                 label2.append(st);
-                fenetre.setVisible(true);
             }
         } 
         catch (Exception e){
@@ -58,5 +58,7 @@ public class AttendUDP extends Thread{
                 label2.setText(null);//vide le texte de la jtexte area
             }
         } );
+        //this.interrupt();
+        arret=true;
     }
 }

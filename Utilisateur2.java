@@ -36,7 +36,9 @@ public class Utilisateur2{
                     AttendTCP atcp = new AttendTCP(Integer.parseInt(port2), ip2, pseudo);
                     audp.start();
                     atcp.start();
-                    while(atcp.isAlive()){}
+                    while(atcp.isAlive()){
+                    }
+
                     audp.stops();
                     System.out.println("grrr");
                 }
