@@ -65,7 +65,9 @@ se créé puis se détruit "à la demande" lors qu'un client veut l'historique e
 sera créé à partir de receiveloop
 
 * startBroadcast () signale au diffuseur qu'il doit commencer à émettre 
-* startListen ()
+* startListen () signale au diffuseur qu'il doit commencer à écouter sur le port spécifier des demandes de client ou de gestionnaire
+
+* stopServer() signale au diffuseur qu'il doit arrêter d'émettre et de recevoir.
 
 ___champs statiques 
 

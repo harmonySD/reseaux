@@ -1,12 +1,12 @@
 import java.util.concurrent.*;
 import java.util.Iterator;
 import java.util.*;
-public class Holder {
+public class Holder implements Iterator<String> {
 
 
 	public static final int HOLDSZ = 999; // nb maximal de messages que contient notre holder
 	//si un nouveau arrive, on écrase le plus ancien non envoyé
-	private ConcurrentLinkedDeque<Message> toSendQueue= new ConcurrentLinkedDeque<Message>();
+	private ConcurrentLinkedQueue<Message> toSendQueue= new ConcurrentLinkedQueue<Message>();
 	private int toSendOccupation=0; // indique le nombre actuel de messages en attente d'envoi
 	private int nextMessageNumber=0;//indique le numéro (Modulo HOLDSZ) qu'aura le prochain message 
 	//utile pour l'envoi et pour le stockage dans l'historique ainsi que l'accès depuis l'historique
@@ -14,7 +14,7 @@ public class Holder {
 	private int historyOccupation =0;// taille actuelle de l'historique, vas jusqu'à HOLDSZ puis chaque nouveau message écrase le plus ancien,
 	// grâce à l'utilisation de nextMessageNumber
 	
-	public Holder(){};// constructeur
+	public Holder(){}// constructeur
 	
 	public synchronized void add(Message toadd) throws NullPointerException{
 		/**Ajoute un Message à la liste des messages à envoyer
@@ -24,18 +24,17 @@ public class Holder {
 			this.toSendQueue.add(toadd);
 			toSendOccupation++; // on augmente le compteur
 		}else{ // si la queue est pleine on supprime le plus ancien non envoyé
-			this.toSendQueue.removeLast();
+			this.toSendQueue.remove();
 			this.toSendQueue.add(toadd);
 		}// pas d'augmentation compteur, liste déjà pleine !
 	}
-	
-
+	@Override
 	public synchronized boolean hasNext() { 
 		return toSendOccupation < 1 ? false:true;
 	}
-		
+	@Override
 	public  synchronized String next() throws NoSuchElementException { // renvoit le prochain message à envoyer
-		Message temp = toSendQueue.removeLast(); // lance NSEException si queue vide
+		Message temp = toSendQueue.remove(); // lance NSEException si queue vide
 		this.toSendOccupation --; //maj occupation file à envoyer
 		String toret = Integer.toString(this.nextMessageNumber)+" "+temp.toString();// ajout du numéro du message pour envoi
 		if (this.historyOccupation< HOLDSZ){this.historyOccupation++;}
@@ -47,7 +46,7 @@ public class Holder {
 	public synchronized String[] retrieveHistory(int howmany){ // /!\ renvoit un tableau de String avec un null si historique vide !
 		// fonction de récupération de l'historique des messages, du plus récent à la position 0 au plus ancien  
 		String [] toret;
-		if (howmany> this.historyOccupation){
+		if (howmany> this.historyOccupation){//vérifier la condition et remplacer si nécessaire pour avoir renvoit correct si historique plein ou non
 			//tableau n'est pas plein et/ou trop de mssages demandés
 			toret = new String[this.historyOccupation];
 			for (int i = this.historyOccupation-1;i>-1;i--){
