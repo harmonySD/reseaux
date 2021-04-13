@@ -12,11 +12,7 @@ public class Utilisateur2{
     }
 
     public static void main(String[] args){
-        String add = args[0];
-        int porttcp = Integer.parseInt(args[1]);
-        String addm = args[2];
-        int portudp = Integer.parseInt(args[3]);
-        String pseudo = completeIfNeeded(args[4],8);
+        String pseudo = completeIfNeeded(args[0],8);
         Scanner sc=new Scanner(System.in);
 
         try{
@@ -25,12 +21,19 @@ public class Utilisateur2{
                 String choix = sc.nextLine();
                 if(choix.equals("diffuseur")){
                     //demander ip port etc
+                    System.out.println("info du diffuseur (id ip1 port2 ip2 port2) : ");
                     // parser la reponse
+                    String diff = sc.nextLine();
+                    String id = diff.substring(0,8);
+                    String ip1 = diff.substring(9,24);
+                    String port1 = diff.substring(25, 29);
+                    String ip2 = diff.substring(30, 45);
+                    String port2 = diff.substring(46, 50);
                     System.out.println("*********UTILISATER2*********\r\n"+
                                         "Id : "+pseudo+"\r\n"+
                                         "******************************");
-                    AttendUDP audp = new AttendUDP(portudp,addm);
-                    AttendTCP atcp = new AttendTCP(porttcp, add, pseudo);
+                    AttendUDP audp = new AttendUDP(Integer.parseInt(port1),ip1);
+                    AttendTCP atcp = new AttendTCP(Integer.parseInt(port2), ip2, pseudo);
                     audp.start();
                     atcp.start();
                     while(atcp.isAlive()){}
