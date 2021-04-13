@@ -31,12 +31,17 @@ public class Utilisateur2{
                     AttendTCP atcp = new AttendTCP(porttcp, add, pseudo);
                     audp.start();
                     atcp.start();
-                    while(atcp.isAlive()){
-                    
-                    }
+                    while(atcp.isAlive()){}
+
                     audp.stops();
-                    System.out.println("grr");
+                    System.out.println("grrr");
                 }
+                // else if(choix.equals("gestionnaire")){
+                //     System.out.println("port :");
+                //     choix = sc.nextLine();
+                //     Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(choix));
+                //     cg.start();
+                // }
             }
         } catch (Exception e){
             e.printStackTrace();

@@ -11,6 +11,7 @@ public class AttendTCP extends Thread{
     int port; 
     String add;
     String pseudo;
+    boolean arret=false;
     public AttendTCP(int p, String a, String pseu){
         port = p;
         add = a;
@@ -45,7 +46,6 @@ public class AttendTCP extends Thread{
         ){
             Scanner sc = new Scanner(System.in);
             String msg;
-            boolean arret=false;
             while(arret==false){
                 //envoie
                 msg = sc.nextLine();
@@ -84,6 +84,7 @@ public class AttendTCP extends Thread{
                 }
                 else if(msg.equals("q")){
                     arret=true;
+                    System.out.println("ici");
                 }
                 
             }

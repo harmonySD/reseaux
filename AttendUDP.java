@@ -50,6 +50,7 @@ public class AttendUDP extends Thread{
     }
     
     public void stops(){
+        System.out.println("okoko");
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 fenetre.setVisible(false);
