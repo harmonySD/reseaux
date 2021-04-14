@@ -214,7 +214,7 @@ void *sendMessage(void *coco) {
                 }
             }
         }
-        printf("erreur connexion %d %s",r2,strerror(errno));
+        printf("erreur connexion %s",strerror(errno));
     }
 }
 
