@@ -48,8 +48,8 @@ Pour demander l'historique taper `LAST` puis le nombre de messages voulu !
 - `pseudo` : le pseudo de votre choix 
 ****
 Choix a faire entre gestionnaire ou diffuseur.
-- Si diffuseur taper `diffuseur`
-- Si  gestionnaire taper `gestionnaire`
+- Si diffuseur taper `diffuseur` puis les informations concernant ce diffuseur.
+- Si  gestionnaire taper `gestionnaire` puis un port.
 
 Pour envoyer un message taper `MESS`puis votre message !
 
