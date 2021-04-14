@@ -143,12 +143,13 @@ diffuseur connection_gestionnaire(char *argv){
 void *sendMessage(void *coco) {
     printf("ici");
     connex *foo=(connex*)coco;
-    int descr=foo->descr;
+    int so=foo->descr;
     struct sockaddr_in adress_sock2=foo->adress_sock;
 
     //int so = *((int *) sock_desc);
     while (1) {
-        printf("hihi");
+        
+        int descr = socket(PF_INET, SOCK_STREAM, 0);
         int r2 = connect(descr, (struct sockaddr *)&adress_sock2,
                 sizeof(struct sockaddr_in));
         printf("r %d",r2);
