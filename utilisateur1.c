@@ -151,6 +151,7 @@ void *sendMessage(void *coco) {
         printf("hihi");
         int r2 = connect(descr, (struct sockaddr *)&adress_sock2,
                 sizeof(struct sockaddr_in));
+        printf("r %d",r2);
         if(r2 != -1){
             printf("la");
             char message[SM+FIN];
