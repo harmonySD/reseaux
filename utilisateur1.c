@@ -67,7 +67,7 @@ diffuseur connection_gestionnaire(char *argv){
         }
         sleep(4);
         char rec[SM+ESP+NUMDIFF+FIN+BSLASH];
-        int taille_recu=recv(descr, rec, SM + ESP + NUMDIFF + FIN, 0);
+        int taille_recu = recv(descr, rec, SM + ESP + NUMDIFF + FIN, 0);
         rec[taille_recu] = '\0';
         //get num_diff
         char *nbstr = strtok(rec, "LINB ");
@@ -81,23 +81,6 @@ diffuseur connection_gestionnaire(char *argv){
             int t_recu = recv(descr, rec, SM + ESP + SIZE_ID + ESP + SIZE_IP + ESP + 
                                 SIZE_PORT + ESP + SIZE_IP + ESP + SIZE_PORT + FIN, 0);
             rec[t_recu] = '\0';
-            // char *sep="ITEM ";
-            // char *tok=strtok(rec,sep);
-            // memcpy(tab[i].id,tok,SIZE_ID+1);
-            // tok=strtok(NULL," ");
-            // memcpy(tab[i].ip1,tok,IP+1);
-            // tok=strtok(NULL," ");
-            // memcpy(tab[i].port1,tok,PORT+1);
-            // printf("port %s",tok);
-            // printf("port struct %s",tab[i].port1);
-            // tok=strtok(NULL," ");
-            // memcpy(tab[i].ip2,tok,IP+1);
-            // tok=strtok(NULL,"\r");
-            // printf("port %s pppp",tok);
-
-            // memcpy(tab[i].port2,tok,PORT+1);
-            // printf("port struct %s\n",tab[i].port2);
-
             char * tok;
             int j = 0;
             tok = strtok (rec,"ITEM ");
@@ -140,11 +123,8 @@ diffuseur connection_gestionnaire(char *argv){
 
 
 void *sendMessage(void *coco) {
-    printf("ici");
     connex *foo=(connex*)coco;
     struct sockaddr_in adress_sock2=foo->adress_sock;
-
-    //int so = *((int *) sock_desc);
     while (1) {
         
         int descr = socket(PF_INET, SOCK_STREAM, 0);
@@ -190,7 +170,7 @@ void *sendMessage(void *coco) {
                     strcpy(nb,"0");
                 }
                 char *m = verif_lenght_nb(nb, 3);
-                printf("m %s", m);
+                //printf("m %s", m);
                 char mess[SM + ESP + NBMESS + FIN];
                 strcpy(mess, message);
                 strcat(mess, " ");
@@ -238,11 +218,10 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
         adress_sock2.sin_port = htons(atoi(port2));//5757
         inet_aton(ip2, &adress_sock2.sin_addr);//"127.0.0.1"
 
-            connex coco;
-   
-            coco.adress_sock=adress_sock2;
-            pthread_t thread;
-            pthread_create(&thread, NULL, sendMessage, &coco);
+        connex coco;
+        coco.adress_sock=adress_sock2;
+        pthread_t thread;
+        pthread_create(&thread, NULL, sendMessage, &coco);
        
         while(1){
             int fd = open(tty,O_RDWR);
