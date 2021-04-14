@@ -148,6 +148,7 @@ void *sendMessage(void *coco) {
 
     //int so = *((int *) sock_desc);
     while (1) {
+        printf("hihi");
         int r2 = connect(descr, (struct sockaddr *)&adress_sock2,
                 sizeof(struct sockaddr_in));
         if(r2 != -1){
@@ -211,6 +212,7 @@ void *sendMessage(void *coco) {
                 }
             }
         }
+        printf("erreur connexion");
     }
 }
 
