@@ -3,10 +3,6 @@
 
 char *ID;
 char *TTY;
-typedef struct{
-    int descr;
-    struct sockaddr_in adress_sock;
-}connex;
 
 char *verif_lenght(char *str, int size){
     char *final_str = str; 
@@ -142,9 +138,8 @@ diffuseur connection_gestionnaire(char *argv){
 
 void *sendMessage(void *coco) {
     printf("ici");
-    connex *foo=(connex*)coco;
-    int so=foo->descr;
-    struct sockaddr_in adress_sock2=foo->adress_sock;
+   // connex *foo=(connex*)coco;
+    struct sockaddr_in adress_sock2=*coco;
 
     //int so = *((int *) sock_desc);
     while (1) {
@@ -241,16 +236,11 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
         adress_sock2.sin_family = AF_INET;
         adress_sock2.sin_port = htons(atoi(port2));//5757
         inet_aton(ip2, &adress_sock2.sin_addr);//"127.0.0.1"
-  
-        int descr = socket(PF_INET, SOCK_STREAM, 0);
-        //int r2 = connect(descr, (struct sockaddr *)&adress_sock2, sizeof(struct sockaddr_in));
 
-        
-            connex coco;
-            coco.descr=descr;
-            coco.adress_sock=adress_sock2;
-            pthread_t thread;
-            pthread_create(&thread, NULL, sendMessage, &coco);
+        connex coco;
+        coco.adress_sock=adress_sock2;
+        pthread_t thread;
+        pthread_create(&thread, NULL, sendMessage, &adress_sock2);
        
         while(1){
             int fd = open(tty,O_RDWR);
