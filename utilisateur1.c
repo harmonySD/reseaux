@@ -123,8 +123,8 @@ diffuseur connection_gestionnaire(char *argv){
 
 
 void *sendMessage(void *coco) {
-    connex *foo=(connex*)coco;
-    struct sockaddr_in adress_sock2=foo->adress_sock;
+    connex *fo o= (connex*)coco;
+    struct sockaddr_in adress_sock2 = foo->adress_sock;
     while (1) {
         
         int descr = socket(PF_INET, SOCK_STREAM, 0);
@@ -157,7 +157,7 @@ void *sendMessage(void *coco) {
                 char recu[SM + FIN + BSLASH];
                 int taille_rec = recv(descr, recu, SM + FIN, 0);
                 recu[taille_rec] = '\0';
-                printf("recu %s\n",recu); //Verification ACKM send
+                //printf("recu %s\n",recu); //Verification ACKM send
                 if(strstr(recu,"ACKM") == NULL){
                     printf("Message non recu par le diffuseur");  
                 }
@@ -190,7 +190,7 @@ void *sendMessage(void *coco) {
                 }
             }
         }else{
-            printf("erreur connexion %s",strerror(errno));
+            printf("erreur connexion %s", strerror(errno));
         }
     }
 }
