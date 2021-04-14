@@ -142,7 +142,6 @@ diffuseur connection_gestionnaire(char *argv){
 void *sendMessage(void *coco) {
     printf("ici");
     connex *foo=(connex*)coco;
-    int so=foo->descr;
     struct sockaddr_in adress_sock2=foo->adress_sock;
 
     //int so = *((int *) sock_desc);
