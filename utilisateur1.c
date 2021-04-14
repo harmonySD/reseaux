@@ -213,7 +213,7 @@ void *sendMessage(void *coco) {
                 }
             }
         }
-        printf("erreur connexion");
+        printf("erreur connexion %d",r2);
     }
 }
 
