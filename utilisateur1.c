@@ -3,6 +3,11 @@
 
 char *ID;
 char *TTY;
+typedef struct{
+    int descr;
+    struct sockaddr_in adress_sock;
+}connex;
+
 char *verif_lenght(char *str, int size){
     char *final_str = str; 
     int size_str = strlen(str);
@@ -135,65 +140,76 @@ diffuseur connection_gestionnaire(char *argv){
 }
 
 
-void *sendMessage(void *sock_desc) {
-    int so = *((int *) sock_desc);
+void *sendMessage(void *coco) {
+    printf("ici");
+    connex *foo=(connex*)coco;
+    int descr=foo->descr;
+    struct sockaddr_in adress_sock2=foo->adress_sock;
+
+    //int so = *((int *) sock_desc);
     while (1) {
-        char message[SM+FIN];
-        scanf("%[^\n]%*c", message);
-        fflush(stdin);
-        if(strstr(message, "MESS")){
-            char messAenv[SIZE_MESS];
-            printf("%s", "entree votre message d'au plus 140 characteres: ");
-            scanf("%[^\n]%*c", messAenv);
+        int r2 = connect(descr, (struct sockaddr *)&adress_sock2,
+                sizeof(struct sockaddr_in));
+        if(r2 != -1){
+            printf("la");
+            char message[SM+FIN];
+            scanf("%[^\n]%*c", message);
             fflush(stdin);
-            char *m = verif_lenght(messAenv, SIZE_MESS);
-            char mess[SM + ESP + SIZE_MESS + ESP + SIZE_ID + FIN];
-            strcpy(mess, message); 
-            strcat(mess, " ");
-            strcat(mess, ID);
-            strcat(mess, " ");
-            strcat(mess, m);
-            strcat(mess, "\r\n");
-            int test_send = send(so, mess, SM + ESP + SIZE_ID + ESP 
-                            + SIZE_MESS + FIN, 0);
-            if(test_send < 0){
-                printf("test_send =%d\n", test_send);
-                printf("%s\n", strerror(errno));
-            }
-            printf("mess :%s\n", mess);
-            char recu[SM + FIN + BSLASH];
-            int taille_rec = recv(so, recu, SM + FIN, 0);
-            recu[taille_rec] = '\0';
-            //printf("recu %s\n",recu); //Verification ACKM send
-            if(strstr(recu,"ACKM") == NULL){
-                printf("Message non recu par le diffuseur");  
-            }
-        }else if(strstr(message, "LAST")){
-            char nb[SM];
-            printf("%s", "afficher combien de message de l'historique : ");
-            scanf("%[^\n]%*c", nb);
-            fflush(stdin);
-            if(atoi(nb) == 0){
-                strcpy(nb,"0");
-            }
-            char *m = verif_lenght_nb(nb, 3);
-            printf("m %s", m);
-            char mess[SM + ESP + NBMESS + FIN];
-            strcpy(mess, message);
-            strcat(mess, " ");
-            strcat(mess, m);
-            strcat(mess, "\r\n");
-            send(so, mess, SM + ESP + NBMESS + FIN, 0);
-            char recu[SM + ESP + NUMMESS + ESP + SIZE_ID + ESP + SIZE_MESS 
-                    + FIN + BSLASH];
-            int taille_rec = recv(so, recu, SM + ESP + NUMMESS + ESP + SIZE_ID
-                    + ESP + SIZE_MESS + FIN, 0);
-            recu[taille_rec] = '\0';
-            while (strstr(recu,"ENDM") == NULL){
-                printf("message de l'historique :%s\n", recu);
-                taille_rec = recv(so, recu, SM + ESP + NUMMESS + ESP + SIZE_ID
-                         + ESP + SIZE_MESS + FIN, 0);
+            if(strstr(message, "MESS")){
+                printf("bam");
+                char messAenv[SIZE_MESS];
+                printf("%s", "entree votre message d'au plus 140 characteres: ");
+                scanf("%[^\n]%*c", messAenv);
+                fflush(stdin);
+                char *m = verif_lenght(messAenv, SIZE_MESS);
+                char mess[SM + ESP + SIZE_MESS + ESP + SIZE_ID + FIN];
+                strcpy(mess, message); 
+                strcat(mess, " ");
+                strcat(mess, ID);
+                strcat(mess, " ");
+                strcat(mess, m);
+                strcat(mess, "\r\n");
+                int test_send = send(descr, mess, SM + ESP + SIZE_ID + ESP 
+                                + SIZE_MESS + FIN, 0);
+                if(test_send < 0){
+                    printf("test_send =%d\n", test_send);
+                    printf("%s\n", strerror(errno));
+                }
+                printf("mess :%s\n", mess);
+                char recu[SM + FIN + BSLASH];
+                int taille_rec = recv(descr, recu, SM + FIN, 0);
                 recu[taille_rec] = '\0';
+                //printf("recu %s\n",recu); //Verification ACKM send
+                if(strstr(recu,"ACKM") == NULL){
+                    printf("Message non recu par le diffuseur");  
+                }
+            }else if(strstr(message, "LAST")){
+                char nb[SM];
+                printf("%s", "afficher combien de message de l'historique : ");
+                scanf("%[^\n]%*c", nb);
+                fflush(stdin);
+                if(atoi(nb) == 0){
+                    strcpy(nb,"0");
+                }
+                char *m = verif_lenght_nb(nb, 3);
+                printf("m %s", m);
+                char mess[SM + ESP + NBMESS + FIN];
+                strcpy(mess, message);
+                strcat(mess, " ");
+                strcat(mess, m);
+                strcat(mess, "\r\n");
+                send(descr, mess, SM + ESP + NBMESS + FIN, 0);
+                char recu[SM + ESP + NUMMESS + ESP + SIZE_ID + ESP + SIZE_MESS 
+                        + FIN + BSLASH];
+                int taille_rec = recv(descr, recu, SM + ESP + NUMMESS + ESP + SIZE_ID
+                        + ESP + SIZE_MESS + FIN, 0);
+                recu[taille_rec] = '\0';
+                while (strstr(recu,"ENDM") == NULL){
+                    printf("message de l'historique :%s\n", recu);
+                    taille_rec = recv(descr, recu, SM + ESP + NUMMESS + ESP + SIZE_ID
+                            + ESP + SIZE_MESS + FIN, 0);
+                    recu[taille_rec] = '\0';
+                }
             }
         }
     }
@@ -223,15 +239,15 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
         inet_aton(ip2, &adress_sock2.sin_addr);//"127.0.0.1"
   
         int descr = socket(PF_INET, SOCK_STREAM, 0);
-        int r2 = connect(descr, (struct sockaddr *)&adress_sock2,
-                sizeof(struct sockaddr_in));
+        //int r2 = connect(descr, (struct sockaddr *)&adress_sock2, sizeof(struct sockaddr_in));
 
-        if(r2 != -1){
+        
+            connex coco;
+            coco.descr=descr;
+            coco.adress_sock=adress_sock2;
             pthread_t thread;
-            pthread_create(&thread, NULL, sendMessage, &descr);
-        }else{
-            printf("error thread");
-        }
+            pthread_create(&thread, NULL, sendMessage, &coco);
+       
         while(1){
             int fd = open(tty,O_RDWR);
             char mess_recu[SM + ESP + NUMMESS + ESP + SIZE_ID + ESP 
