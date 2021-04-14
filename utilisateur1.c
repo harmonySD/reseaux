@@ -213,8 +213,9 @@ void *sendMessage(void *coco) {
                     recu[taille_rec] = '\0';
                 }
             }
+        }else{
+            printf("erreur connexion %s",strerror(errno));
         }
-        printf("erreur connexion %s",strerror(errno));
     }
 }
 
