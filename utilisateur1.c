@@ -156,7 +156,6 @@ void *sendMessage(void *coco) {
             scanf("%[^\n]%*c", message);
             fflush(stdin);
             if(strstr(message, "MESS")){
-                printf("bam");
                 char messAenv[SIZE_MESS];
                 printf("%s", "entree votre message d'au plus 140 characteres: ");
                 scanf("%[^\n]%*c", messAenv);
@@ -175,11 +174,11 @@ void *sendMessage(void *coco) {
                     printf("test_send =%d\n", test_send);
                     printf("%s\n", strerror(errno));
                 }
-                printf("mess :%s\n", mess);
+                //printf("mess :%s\n", mess);
                 char recu[SM + FIN + BSLASH];
                 int taille_rec = recv(descr, recu, SM + FIN, 0);
                 recu[taille_rec] = '\0';
-                //printf("recu %s\n",recu); //Verification ACKM send
+                printf("recu %s\n",recu); //Verification ACKM send
                 if(strstr(recu,"ACKM") == NULL){
                     printf("Message non recu par le diffuseur");  
                 }
