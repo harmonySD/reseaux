@@ -123,7 +123,7 @@ diffuseur connection_gestionnaire(char *argv){
 
 
 void *sendMessage(void *coco) {
-    connex *fo o= (connex*)coco;
+    connex *foo= (connex*)coco;
     struct sockaddr_in adress_sock2 = foo->adress_sock;
     while (1) {
         

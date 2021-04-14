@@ -38,15 +38,16 @@ public class AttendTCP extends Thread{
 
 
     public void run(){
-        try(Socket cs = new Socket(add,port);
-            //envoie
-            PrintWriter out = new PrintWriter(cs.getOutputStream());
-             //recoit
-             BufferedReader in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
-        ){
-            Scanner sc = new Scanner(System.in);
-            String msg;
-            while(arret==false){
+        while(arret==false){
+            try(Socket cs = new Socket(add,port);
+                //envoie
+                PrintWriter out = new PrintWriter(cs.getOutputStream());
+                //recoit
+                BufferedReader in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
+            ){
+                Scanner sc = new Scanner(System.in);
+                String msg;
+            
                 //envoie
                 msg = sc.nextLine();
                 if(msg.equals("MESS")){
@@ -88,8 +89,9 @@ public class AttendTCP extends Thread{
                 }
                 
             }
-        } catch (Exception e){
+             catch (Exception e){
             e.printStackTrace();
+            }
         }
     }
 }
