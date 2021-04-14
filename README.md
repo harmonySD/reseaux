@@ -17,19 +17,44 @@
 ```
 ***pour le gestionnaire :***
 ```
->./gestionnaire port
+>./gestio port
 ```
 *Avec* 
 - `port` : port du gestionnaire 
 
 ***pour l'utilisateur***
+
+*le client en C faire :*
+
 ```
->./utilisateur port tty pseudo 
+>./client port tty pseudo 
 ```
 *Avec*
 - `port` : port d'un gestionnaire
 - `tty`: lien d'un fichier **IO** d'un autre terminale, pour y afficher les messages recu d'un diffuseur
 - `pseudo` : le pseudo de votre choix 
+***
+Pour envoyer un message taper `MESS` puis votre message !
+
+Pour demander l'historique taper `LAST` puis le nombre de messages voulu !
+****
+
+*le client en Java faire :*
+```
+>java Utilisateur2 pseudo
+```
+*Avec*
+
+- `pseudo` : le pseudo de votre choix 
+****
+Choix a faire entre gestionnaire ou diffuseur.
+- Si diffuseur taper `diffuseur`
+- Si  gestionnaire taper `gestionnaire`
+
+Pour envoyer un message taper `MESS`puis votre message !
+
+Pour demander l'historique taper `LAST`puis le nombre de messages voulu !
+****
 
 ***
 ***Diffuseur***
