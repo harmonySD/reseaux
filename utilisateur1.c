@@ -66,6 +66,7 @@ diffuseur connection_gestionnaire(char *argv){
         int taille_recu=recv(descr, rec, SM + ESP + NUMDIFF + FIN, 0);
         rec[taille_recu] = '\0';
         //get num_diff
+        printf("recu :%s",rec);
         char *nbstr = strtok(rec, "LINB ");
         int nb = atoi(nbstr);
         diffuseur tab[nb];
@@ -259,15 +260,15 @@ int main(int argc, char**argv){
 
 
     //diffuseur diffuseur=connection_gestionnaire(argv[1]);
-    // printf("port1 %s\n",diffuseur.port1);
-    // printf("ip1 %s\n",diffuseur.ip1);
-    // printf("ip2 %s\n",diffuseur.ip2);
-    // printf("port2 %s\n",diffuseur.port2);
-    // printf("id %s",ID);
+    //  printf("port1 %s\n",diffuseur.port1);
+    //  printf("ip1 %s\n",diffuseur.ip1);
+    //  printf("ip2 %s\n",diffuseur.ip2);
+    //  printf("port2 %s\n",diffuseur.port2);
+    //  printf("id %s",ID);
     printf("**********UTILISATEUR**********\n");
     printf("Id: %s\n",ID);
     printf("*******************************\n");
-    connection_diffuseur("5656","225.10.20.30","5454","127.0.0.1",ID,TTY);//port et  addresse issue de la structure  PAS SURE 
+    connection_diffuseur("5151","225.010.020.030","5252","127.000.000.001",ID,TTY);//port et  addresse issue de la structure  PAS SURE 
     //connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID);
 
 
