@@ -4,7 +4,7 @@ import java.util.*;
 public class Holder implements Iterator<String> {
 
 
-	public static final int HOLDSZ = 999; // nb maximal de messages que contient notre holder
+	public static final int HOLDSZ = 9999; // nb maximal de messages que contient notre holder
 	//si un nouveau arrive, on écrase le plus ancien non envoyé
 	private ConcurrentLinkedQueue<Message> toSendQueue= new ConcurrentLinkedQueue<Message>();
 	private int toSendOccupation=0; // indique le nombre actuel de messages en attente d'envoi

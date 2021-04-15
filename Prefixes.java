@@ -1,20 +1,22 @@
 public enum Prefixes {
 	// liste uniformisée de tous les 
 	// préfixe admissible sur le réseau
-	 DIFF 
-	,MESS
-	,ACKM
-	,LAST 
-	,OLDM
-	,ENDM
-	,REGI  
-	,REOK 
-	,RENO 
-	,RUOK 
-	,IMOK 
-	,LIST  
-	,LINB 
-	,ITEM;
+	 DIFF(158)
+	,MESS(154)
+	,ACKM(4)
+	,LAST(8)
+	,OLDM(DIFF.normalMessLength)
+	,ENDM(1417)
+	,REGI(1417)
+	,REOK(4)
+	,RENO(4)
+	,RUOK(4)
+	,IMOK(4)
+	,LIST(4)
+	,LINB(7)
+	,ITEM(1417);
+	Prefixes(int normallyWaitedMessagelength){ this.normalMessLength =normallyWaitedMessagelength;}
+	public final int normalMessLength;
 	@Override 
 	public String toString(){ return this.name();}
 	}

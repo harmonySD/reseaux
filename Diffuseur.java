@@ -1,43 +1,80 @@
 import java.net.*;
+/*
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+*/
+
+import java.util.*;
+import java.io.IOException;
+
+
 
 /**
  * classe du diffuseur 
- * 
- * 
  * **/
 public class Diffuseur{
 
 	private final String id ;
-	private unsigned int rcvprt;
+	private  int rcvprt;
 	private DatagramSocket mltcstSock;
-	private  long frqcy= 10000; 
-	private Holder msgholder  ; // ACCES CONCURRENT
+	private  long frqcy= 10000;
+	private Holder msgHolder  ; // ACCES CONCURRENT
 	private  Thread broadcastThread ;
-	private  Thread receivethread;
-	public final boolean startBroadcast()throws{}
-	public final boolean startListen()throws{}
+	private  boolean broadcastThreadIsWaiting = false; // le SEUL modifieur est broadCastLoop
+	private  Thread receiveThread;
+	public final boolean startBroadcast(){this.broadcastThread.start(); return true;}
+	public final boolean startListen(){this.receiveThread.start(); return true;}
 	
-	public Diffuseur(String id, int recvPort,  int multiCastPort, String multiCastAddress ) throws SocketException{
-		if(recvPort <0 || multiCastPort <0  || recvPort > 65535|| multiCastPort > 65535 ){throw new IllegalArgumentException("Port  incorrect");}
+	public Diffuseur(String MultiCasterID, int recvPort,  int multiCastPort, String multiCastAddress ) throws SocketException,UnknownHostException {
+		if(recvPort <0 || multiCastPort <0  || recvPort > 65535|| multiCastPort > 65535 ){
+			throw new IllegalArgumentException("Port  incorrect");
+		}
+		this.id = MultiCasterID;
 		this.rcvprt = recvPort ;
-		this.mltcstSock = new DatagramSocket(multiCastPort,InetAdress.getByName(broadCastAddress)); // peut lancer SocketException
+		this.mltcstSock = new DatagramSocket(multiCastPort,InetAddress.getByName(multiCastAddress)); // peut lancer SocketException
 		this.mltcstSock.setReuseAddress​(true); // pour se faciliter la vie par la suite 
 		
-		this.broadCastThread =new Thread( ()->{this.broadcastLoop();} );
+		this.broadcastThread =new Thread( ()->{this.broadcastLoop();} );
 		this.receiveThread = new Thread( ()->{this.receiveLoop();} );
-		this.broadCastThread.startListen();
-		this.broadCastThread.startBroadcast;
+		
+		this.startListen();
+		this.startBroadcast();
 	}
 	
-	private broadcastLoop (){
-		Message tosend ;
+	private void broadcastLoop (){
+		DatagramSocket thesender;
+		DatagramPacket packtosend;
 		try{
+			thesender = new DatagramSocket();
+			packtosend = new DatagramPacket(
+				new byte [Prefixes.DIFF.normalMessLength],
+				Prefixes.DIFF.normalMessLength,
+				this.getMulticastSock().getLocalSocketAddress()
+			);   
+		}catch(Exception e ){return;}
+		try{ // pour attrapper demande d'interruption
 			while(true){
-				try{this.msgholder.
-					}catch(NoSuchElementException ns){
-						this.wait();
+				try{
+					String tosend=Prefixes.DIFF.toString()+this.msgHolder.next();
+					packtosend.setData(tosend.getBytes());
+					if (packtosend.getLength() != Prefixes.DIFF.normalMessLength ){
+						System.err.println("/!\\ Attention le message suivant de taille incorrecte à failli être envoyé"
+							+"\nle message :\""+packtosend.getData().toString()
+							+"\"\n Longueur attendue" 
+							+Prefixes.DIFF.normalMessLength
+							+", longueur obtenue :"+packtosend.getLength()+"\n"
+						);
 						continue;
 					}
+					thesender.send(packtosend);
+				}catch(NoSuchElementException ns){ // historique vide, on passe en sommeil
+						this.broadcastThreadIsWaiting = true;
+						msgHolder.wait();
+						this.broadcastThreadIsWaiting = false;
+						continue;
+				}catch (IOException ioex){
+					System.err.println(ioex.toString());
+				}
 				Thread.sleep(this.getFrequency());
 			}
 		} catch(InterruptedException end){
@@ -45,35 +82,34 @@ public class Diffuseur{
 			}
 	}
 	
-	private receiveLoop(){
-		try(){
+	private void receiveLoop(){
+		/*try{// pour rattrapper une demande d'interruption
+			throw new InterruptedException ();
 			while(true){
 				String uidrec;
 				String mssgrec;
-				this.Holder.add(new Message(uidrec,mssgrec));
-				this.broadcastThread().notify();
+				this.msgHolder.add(new Message(uidrec,mssgrec));
+				if (this.broadcastThreadIsWaiting){this.msgHolder.notify();}
 			}
-		}catch(InterruptedException end){
-			}
+		}catch(InterruptedException end){// code en cas de demande d'interruption du thread 
+			}*/
 	}
 	
-	private historygiver(){
+	private void historygiver(){
 	
 	}
+	
 	public void stopServer(){
 		
 		
 		}
-		
-		
-	public synchronized int getBroadcastPort(){return this.brdcstprt;}
+	public synchronized int getBroadcastPort(){return this.mltcstSock.getLocalPort();}
 	public synchronized int getReceivePort(){return this.rcvprt;}
 	public synchronized long getFrequency(){return this.frqcy;}
-	public synchronized long setFrequency(long newFreq){this.frqcy = newFreq;}
-	private synchronized DatagramSocket getBroadcastSock(){return this.mltcstSock;}
-	public static String getLocalAdress(){return InetAdress.getLocalHost.toString();}
-	package private synchronized Holder getHolder(){/** à utiliser uniquement à des fins de débogage ! **/return this.Holder;}
-	 
+	public synchronized void setFrequency(long newFreq){this.frqcy = newFreq;}
+	private synchronized DatagramSocket getMulticastSock(){return this.mltcstSock;}
+	public static String getLocalAddress() throws UnknownHostException{return InetAddress.getLocalHost().toString();}
+	synchronized Holder getHolder(){/** à utiliser uniquement à des fins de débogage !  package private**/return this.msgHolder;}
 }
 
 	

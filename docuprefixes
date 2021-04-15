@@ -32,6 +32,7 @@ ITEM
 
 ___Champs d'instances
 
+normalMessLength la longueur normale / maximale d'un message attendu ayant ce préfixe
 
 ___méthodes d'instances
 
