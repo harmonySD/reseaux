@@ -1,0 +1,56 @@
+Pendant cette semaine a été faite la classe Message.java et Holder.java
+Holder m'a donné du fil à retordre en effet 
+
+1.) J'ai dû abandonner l'idée d'implémenter l'interface itérable 
+Le Next renvoyait un String contenant le numéro du message,
+l'id et le message, il ne peut pas renvoyer l'OBJET message car le numéro du message est stocké dans la classe Holder et pas dans 
+l'OBJET message 
+Alors que le Add prenait en entrée un OBJET message, impossible si on override pour implémenter la classe iterator 
+car il faudrait que le type du paramètre de Add et celui du retour de Next soient identiques,
+hors c'était impossible dans notre cas.
+
+2.) La gestion de la file des messages à envoyer 
+
+La file des messages à envoyer est une ConcurrentLinkedDeQueue (DeQueue= double file)
+mais je me rends compte à présent qu'une ConcurrentLinkedQueue aurait suffit et je changerai ça.
+Elle stocke les messages qui n'ont pas encore été envoyé, jusqu'à HOLDSZ messages simultanément, dans l'ordre d'ajout.
+A tout moment de l'exécution, le nombre de message en attente dans la pile est stocké dans toSendOccupation 
+car utiliser le length fourni de la queue ne se fait pas en temps constant (cf. la docu de java ).
+J'ai donc décidé de  gérer le nb de message stockés à l'exécution dans notre classe pour tenter d'optimiser un peu .
+nextMessagenumber contient le numéro qui sera ajouté au prochain message à envoyer sous forme de chaine de caractère
+il est uniquement incrémenté par un appel de NEXT et son ensemble de déf se trouve dans [0:HOLDSZ](il boucle à 0 quand il atteint HOLDSZ)
+
+3.) La gestion de l'historique
+Contrairement à la file des messages à envoyer on stocke tout dans un TABLEAU de message nommé HistoryQueue
+chaque message envoyé par next est stocké dans ce tableau à la bonne position grâce à la donnée NextMessage Number
+(qui permet d'écraser par la même occasion les messages les plus anciens de l'historique)
+HistoryOccupation sert à connaître l'état de remplissage de l'historique 
+il va de 0 à HOLDSZ et une fois qu'il l'a atteint il ne bouge plus (l'ajout d'un message dans l'historique plein ne fait 
+qu'écraser l'ancien par le nouveau et ne change pas le nombre total de messages dans l'historique)
+
+4.) la fonction de récupération des messages à envoyer
+La plus horrible de toutes.
+
+l'idée générale est de partir de nextmessagenumber-1 qui nous indique ou est stocké dans le tableau de l'historique
+le dernier message envoyé ( le plus récent donc) 
+et de remonter le tableau jusqu'à 0 (pour avoir les messages dans l'ordre chronologique) de là si il nous faut encore 
+des messages plus anciens (et que le tableau est plein)
+on revient à la fin du tableau et on remonte jusqu'à nextmessagenumber qui est le plus ancien message encore stocké
+
+Il a fallu gérer 3 cas au travers d'un if elseif else 
+
+le if : Si on demande plus de messages que l'historique n'en contient, et l'historique n'est pas plein , 
+on remonte le tableau jusqu'à zéro  ( on récupère tous les messages réellement stockés ) et on renvoit un tableau plus petit 
+manque la condition que l'historique n'est pas plein, à corriger 
+
+le else if
+Si on demande un nombre de message qui n'est pas supérieur à nextmessagenumber et que le tableau contient assez de message (
+on n'a pas à reboucler sur la fin du tableau pour avoir les messages 
+les plus anciens après avoir atteint le début en étant parti du message le plus récent dans le tableau. 
+on recule bêtement du message le plus récent jusqu'à 0
+)
+le else on demande un nombre de message supérieur à next Messagenumber (donc il va falloir reboucler sur la fin du tableau)
+ou carrément plus de HOLDSZ message, on renvoit tout l'historique.
+
+Dans le tableau retourné, le message le plus récent est en position 0 et le plus ancien est à la fin du tableau.
+la taille du tableau dépend de l'historique disponible et du nombre de messages demandés 

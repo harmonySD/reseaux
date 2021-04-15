@@ -69,4 +69,28 @@ public class Holder implements Iterator<String> {
 		}
 			return toret;
 	}
+	public synchronized String[] retrieveHistory(int howmany){
+	    String [] toret;
+	    if(howmany >this.nextMessageNumber -1 ){
+	        if(historyOccupation == HOLDSZ){
+	            int towhere = howmany > HOLDSZ ? :this.nextMessageNumber;
+	            
+	        }else{
+    	        toret = new String[howmany];
+    	        for (int i = howmany-1;i>-1;i--){
+    				toret[howmany-1-i]=Integer.toString((this.nextMessageNumber-1-i))+" "+this.HistoryQueue[this.nextMessageNumber-1-i].toString();
+    			}    
+	        }   
+	    }
+	    else{ // cas nb messages demandés < indice et quantité sotcké, pas à boucler en fin de tableau
+	        toret = new String[howmany];
+	        for (int i = howmany-1;i>-1;i--){
+				toret[howmany-1-i]=Integer.toString((this.nextMessageNumber-1-i))+" "+this.HistoryQueue[this.nextMessageNumber-1-i].toString();
+			}
+	    }
+	    
+	    
+	 return toret;   
+	}
+	
 }
