@@ -23,6 +23,9 @@ public class AttendTCP extends Thread{
         if(manytofill > 0){
           return src + "#".repeat(manytofill);  
         }
+        else if(manytofill<0){
+            return src.substring(0, wantedsz);
+        }
         return src;
     }
     public String completenbIfNeeded(String src, int wantedsz){
@@ -55,6 +58,7 @@ public class AttendTCP extends Thread{
                     System.out.println("Entrer votre message : ");
                     msg = sc.nextLine();
                     msg = completeIfNeeded(msg, datasz);
+                    System.out.println("TAILLE "+msg.length());
                     menv = "MESS " + pseudo + " " + msg + "\r\n";
                     out.print(menv);
                     out.flush();

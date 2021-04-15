@@ -8,6 +8,9 @@ public class Utilisateur2{
         if(manytofill>0){
           return src + "#".repeat(manytofill);  
         }
+        else if(manytofill<0){
+            return src.substring(0, wantedsz);
+        }
         return src;
     }
 
