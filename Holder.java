@@ -42,7 +42,7 @@ public class Holder implements Iterator<String> {
 		this.nextMessageNumber=(this.nextMessageNumber  +1 )%HOLDSZ;
 		return toret;
 	}
-		
+		/*
 	public synchronized String[] retrieveHistory(int howmany){ // /!\ renvoit un tableau de String avec un null si historique vide !
 		// fonction de récupération de l'historique des messages, du plus récent à la position 0 au plus ancien  
 		String [] toret;
@@ -68,29 +68,27 @@ public class Holder implements Iterator<String> {
 			}
 		}
 			return toret;
-	}
+	}*/
+	
+	
 	public synchronized String[] retrieveHistory(int howmany){
 	    String [] toret;
-	    if(howmany >this.nextMessageNumber -1 ){
-	        if(historyOccupation == HOLDSZ){
-	            int towhere = howmany > HOLDSZ ? :this.nextMessageNumber;
-	            
-	        }else{
-    	        toret = new String[howmany];
-    	        for (int i = howmany-1;i>-1;i--){
-    				toret[howmany-1-i]=Integer.toString((this.nextMessageNumber-1-i))+" "+this.HistoryQueue[this.nextMessageNumber-1-i].toString();
-    			}    
-	        }   
-	    }
-	    else{ // cas nb messages demandés < indice et quantité sotcké, pas à boucler en fin de tableau
-	        toret = new String[howmany];
+	    if((!( howmany> this.nextMessageNumber )) || this.HOLDSZ > this.historyOccupation){
+			//  nb messages demandés < indice || trops de messages demandés : pas à /impossible boucler en fin de tableau			
+			toret = new String[howmany];
 	        for (int i = howmany-1;i>-1;i--){
 				toret[howmany-1-i]=Integer.toString((this.nextMessageNumber-1-i))+" "+this.HistoryQueue[this.nextMessageNumber-1-i].toString();
 			}
-	    }
-	    
-	    
+	    }else{
+			// il faut reboucler sur la fin du tableau 
+			int numtoget = howmany > this.HOLDSZ ? HOLDSZ:howmany ;
+			toret = new String[numtoget];
+			for (int i = numtoget;i>0;i--){
+				toret[i-numtoget]=Integer.toString((this.nextMessageNumber-1-i)%HOLDSZ)
+				+" "
+				+this.HistoryQueue[this.nextMessageNumber-1-i%HOLDSZ].toString();
+			}
+		}
 	 return toret;   
 	}
-	
 }
