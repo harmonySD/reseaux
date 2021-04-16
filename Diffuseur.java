@@ -1,11 +1,12 @@
 import java.net.*;
+import java.util.*;
+import java.io.IOException;
+
+
 /*
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 */
-
-import java.util.*;
-import java.io.IOException;
 
 
 
@@ -79,7 +80,7 @@ public class Diffuseur{
 			}
 		} catch(InterruptedException end){
 			// code en cas de demande d'interruption du thread 
-			}
+		}
 	}
 	
 	private void receiveLoop(){
@@ -100,9 +101,15 @@ public class Diffuseur{
 	}
 	
 	public void stopServer(){
-		
+			this.broadcastThread.interrupt();
+			this.receiveThread.interrupt();
 		
 		}
+	public void addAMessage(Message m){
+		if (m== null){return;}
+		this.msgHolder.add(m);
+		return;
+	}
 	public synchronized int getBroadcastPort(){return this.mltcstSock.getLocalPort();}
 	public synchronized int getReceivePort(){return this.rcvprt;}
 	public synchronized long getFrequency(){return this.frqcy;}
@@ -110,6 +117,24 @@ public class Diffuseur{
 	private synchronized DatagramSocket getMulticastSock(){return this.mltcstSock;}
 	public static String getLocalAddress() throws UnknownHostException{return InetAddress.getLocalHost().toString();}
 	synchronized Holder getHolder(){/** à utiliser uniquement à des fins de débogage !  package private**/return this.msgHolder;}
+
+	public static void main (String [] args)throws Exception {
+		Diffuseur lediff = new Diffuseur(args[0], Integer.valueOf(args[1]), Integer.valueOf(args[2]),args[3]);
+		try{
+			Scanner sc = new Scanner(System.in);
+			for(int i =0;i<20;i++){
+				lediff.addAMessage(new Message("M0ral3s",sc.nextLine()));
+			}
+		}catch(NoSuchElementException ns){return;}
+		lediff.broadcastThread.notify();
+		try{
+		Object lock= new Object();
+		synchronized(lock){
+			lock.wait(10000);
+			lock.notify();
+		}
+		}catch(Exception e){}
+	}
 }
 
 	
