@@ -39,8 +39,13 @@ public class AttendUDP extends Thread{
             fenetre.setVisible(true);
             while(arret==false){
                 mso.receive(paquet);
-                String st = new String(paquet.getData(),0,paquet.getLength());
-                label2.append(st);
+                if(paquet.getLength()!=(4 + 1 + 4 + 1 + idsz + 1 + datasz + 2)){
+                    System.out.println("recu mauvaise taille");
+
+                }else{
+                    String st = new String(paquet.getData(),0,paquet.getLength());
+                    label2.append(st);
+                }
             }
         } 
         catch (Exception e){
