@@ -17,7 +17,8 @@ public class Diffuseur{
 
 	@SuppressWarnings("unused")
 	private final String id ;
-	private  int rcvprt;
+	private  int rcvPrt;
+	private ServerSocket rcvSock;
 	private InetSocketAddress mltcstSA;
 	private DatagramSocket mltcstSock;
 	private  long frqcy= 5000;
@@ -41,6 +42,10 @@ public class Diffuseur{
 		
 		this.broadcastThread =new Thread( ()->{this.broadcastLoop();} );
 		this.receiveThread = new Thread( ()->{this.receiveLoop();} );
+		
+		this.rcvPrt = recvPort;
+		this.rcvSock = new ServerSocket(this.rcvPrt);
+		this.rcvSock.setReuseAddress(true);
 		
 		this.startListen();
 		this.startBroadcast();
@@ -90,16 +95,26 @@ public class Diffuseur{
 	}
 	
 	private void receiveLoop(){
-		/*try{// pour rattrapper une demande d'interruption
-			throw new InterruptedException ();
+		try{
 			while(true){
-				String uidrec;
-				String mssgrec;
-				this.msgHolder.add(new Message(uidrec,mssgrec));
-				if (this.broadcastThreadIsWaiting){this.msgHolder.notify();}
+				Socket connectedSocket = rcvSock.accept();
+				byte[] mssgHeader = new byte[Prefixes.headerSZ];
+				if(Prefixes.headerSZ != connectedSocket.getInputStream.read(mssgHeader)){connectedSocket.close();continue;}
+				String 
+				switch(){
+					case Prefixes.LAST.toString(): break;
+					case Prefixes.RUOK.toString():break;
+					case Prefixes.MESS.toString():break;
+					default:connectedSocket.close();
+				}
 			}
-		}catch(InterruptedException end){// code en cas de demande d'interruption du thread 
-			}*/
+		}catch(InterruptedException end){ 
+			
+			rcvSock.close();
+			connectedSocket.close();
+			
+			// code en cas de demande d'interruption du thread 
+			}
 	}
 	
 	private void historygiver(){

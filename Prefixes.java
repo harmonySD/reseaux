@@ -16,8 +16,9 @@ public enum Prefixes {
 	,IMOK(4)
 	,LIST(4)
 	,LINB(7)
-	,ITEM(1417);
+	,ITEM(1417); // FIXME quelle taille attendue ici ?
 	Prefixes(int normallyWaitedMessagelength){ this.normalMessLength =normallyWaitedMessagelength;}
+	public static final headerSZ = 4;
 	public final int normalMessLength;
 	@Override 
 	public String toString(){ return this.name();}
