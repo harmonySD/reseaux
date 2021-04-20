@@ -5,8 +5,9 @@ ___Idée générale
 
 
 Cette classe sert à contenir les messages qu'un diffuseur 
-doit émettre via la classe Message, jusqu'à HOLDSZ = 999 messages
+doit émettre via la classe Message, jusqu'à HOLDSZ = 9999 messages
 elle conserve aussi un historique des HOLDSZ derniers messages émis
+(même si on ne doit pouvoir en récupérer que 999)
 fait l'usage d'une file à double sens "ConcurrentLinkedDeque" 
  les messages à envoyer
  l'historique est quant à lui stocker 
@@ -32,10 +33,10 @@ ___méthodes d'instances
 
 add(Message ) permet d'ajouter un nouveau message à envoyer 
 
-retrieveHistory(int) renvoit un tableau de taille au plus int de chaines de caractères. Ce tableau est l'historique des messages
+retrieveHistory(int) renvoit un tableau de taille au plus int de chaines de caractères. Ce tableau est l'historique des messages (int ou 999 selon le plus petit)
 qui ont été auparavant récupérés par l'intermédiaire de next  à l'instant T de l'appel de retrieveHistory
 /!\ ATTENTION SI HISTORIQUE VIDE RENVOIT UN TABLEAU AVEC UNE SEULE CHAINE A NULL
-
+//pourquoi ne pas lancer plutôt NoSuchElementException ?
 next() fonction qui permet de récupérer le prochain message à envoyer  
 sous la forme d'une chaîne de caractère
 
@@ -43,7 +44,7 @@ sous la forme d'une chaîne de caractère
 
 ___champs statiques 
 
-HOLDSZ capacité maximale de stockage de message/historique; ici 999
+HOLDSZ capacité maximale de stockage de message/historique; ici 9999
 
 ___méthodes statiques
 

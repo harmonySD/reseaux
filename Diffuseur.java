@@ -15,10 +15,12 @@ import java.net.InetAddress;
  * **/
 public class Diffuseur{
 
+	@SuppressWarnings("unused")
 	private final String id ;
 	private  int rcvprt;
+	private InetSocketAddress mltcstSA;
 	private DatagramSocket mltcstSock;
-	private  long frqcy= 10000;
+	private  long frqcy= 5000;
 	private Holder msgHolder  ; // ACCES CONCURRENT
 	private  Thread broadcastThread ;
 	private  boolean broadcastThreadIsWaiting = false; // le SEUL modifieur est broadCastLoop
@@ -32,8 +34,10 @@ public class Diffuseur{
 		}
 		this.id = MultiCasterID;
 		this.rcvprt = recvPort ;
-		this.mltcstSock = new DatagramSocket(multiCastPort,InetAddress.getByName(multiCastAddress)); // peut lancer SocketException
-		this.mltcstSock.setReuseAddress​(true); // pour se faciliter la vie par la suite 
+		this.mltcstSock = new DatagramSocket(); // peut lancer SocketException
+		this.mltcstSock.setReuseAddress(true); // pour se faciliter la vie par la suite 
+		this.mltcstSA = new InetSocketAddress(multiCastAddress,multiCastPort);
+		this.msgHolder = new Holder();
 		
 		this.broadcastThread =new Thread( ()->{this.broadcastLoop();} );
 		this.receiveThread = new Thread( ()->{this.receiveLoop();} );
@@ -42,7 +46,7 @@ public class Diffuseur{
 		this.startBroadcast();
 	}
 	
-	private void broadcastLoop (){
+	 private synchronized void  broadcastLoop (){
 		DatagramSocket thesender;
 		DatagramPacket packtosend;
 		try{
@@ -50,18 +54,18 @@ public class Diffuseur{
 			packtosend = new DatagramPacket(
 				new byte [Prefixes.DIFF.normalMessLength],
 				Prefixes.DIFF.normalMessLength,
-				this.getMulticastSock().getLocalSocketAddress()
+				this.mltcstSA
 			);   
 		}catch(Exception e ){return;}
 		try{ // pour attrapper demande d'interruption
 			while(true){
 				try{
-					String tosend=Prefixes.DIFF.toString()+this.msgHolder.next();
+					String tosend=Prefixes.DIFF.toString()+" "+this.msgHolder.next();
 					packtosend.setData(tosend.getBytes());
 					if (packtosend.getLength() != Prefixes.DIFF.normalMessLength ){
 						System.err.println("/!\\ Attention le message suivant de taille incorrecte à failli être envoyé"
-							+"\nle message :\""+packtosend.getData().toString()
-							+"\"\n Longueur attendue" 
+							+"\nle message :\""+new String(packtosend.getData())
+							+"\"\n Longueur attendue " 
 							+Prefixes.DIFF.normalMessLength
 							+", longueur obtenue :"+packtosend.getLength()+"\n"
 						);
@@ -70,7 +74,9 @@ public class Diffuseur{
 					thesender.send(packtosend);
 				}catch(NoSuchElementException ns){ // historique vide, on passe en sommeil
 						this.broadcastThreadIsWaiting = true;
-						msgHolder.wait();
+						synchronized(this.msgHolder){
+							msgHolder.wait();
+						}
 						this.broadcastThreadIsWaiting = false;
 						continue;
 				}catch (IOException ioex){
@@ -107,7 +113,8 @@ public class Diffuseur{
 		}
 	public void addAMessage(Message m){
 		if (m== null){return;}
-		this.msgHolder.add(m);
+		synchronized (this.msgHolder){
+		this.msgHolder.add(m);}
 		return;
 	}
 	public synchronized int getBroadcastPort(){return this.mltcstSock.getLocalPort();}
@@ -122,11 +129,15 @@ public class Diffuseur{
 		Diffuseur lediff = new Diffuseur(args[0], Integer.valueOf(args[1]), Integer.valueOf(args[2]),args[3]);
 		try{
 			Scanner sc = new Scanner(System.in);
-			for(int i =0;i<20;i++){
-				lediff.addAMessage(new Message("M0ral3s",sc.nextLine()));
+			String temp;
+			for(int i =0;i<10;i++){
+				temp = sc.nextLine();
+				System.out.println("Ajout du message : "+temp);
+				lediff.addAMessage(new Message("M0ral3s",temp));
 			}
 		}catch(NoSuchElementException ns){return;}
-		lediff.broadcastThread.notify();
+		synchronized(lediff.msgHolder) {
+			lediff.msgHolder.notify();}
 		try{
 		Object lock= new Object();
 		synchronized(lock){

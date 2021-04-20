@@ -1,3 +1,4 @@
+
 import java.util.concurrent.*;
 import java.util.Iterator;
 import java.util.*;
@@ -36,11 +37,11 @@ public class Holder implements Iterator<String> {
 	public  synchronized String next() throws NoSuchElementException { // renvoit le prochain message à envoyer
 		Message temp = toSendQueue.remove(); // lance NSEException si queue vide
 		this.toSendOccupation --; //maj occupation file à envoyer
-		String toret = Integer.toString(this.nextMessageNumber)+" "+temp.toString();// ajout du numéro du message pour envoi
+		String toret =String.format("%04d",this.nextMessageNumber)+" "+temp.toString();// ajout du numéro du message pour envoi
 		if (this.historyOccupation< HOLDSZ){this.historyOccupation++;}
 		this.HistoryQueue[this.nextMessageNumber]=temp;
 		this.nextMessageNumber=(this.nextMessageNumber  +1 )%HOLDSZ;
-		return toret;
+		return toret;// la taille de toret doit être 
 	}
 		/*
 	public synchronized String[] retrieveHistory(int howmany){ // /!\ renvoit un tableau de String avec un null si historique vide !
@@ -73,7 +74,7 @@ public class Holder implements Iterator<String> {
 	
 	public synchronized String[] retrieveHistory(int howmany){
 	    String [] toret;
-	    if((!( howmany> this.nextMessageNumber )) || this.HOLDSZ > this.historyOccupation){
+	    if((!( howmany> this.nextMessageNumber )) || Holder.HOLDSZ > this.historyOccupation){
 			//  nb messages demandés < indice || trops de messages demandés : pas à /impossible boucler en fin de tableau			
 			toret = new String[howmany];
 	        for (int i = howmany-1;i>-1;i--){
@@ -81,7 +82,7 @@ public class Holder implements Iterator<String> {
 			}
 	    }else{
 			// il faut reboucler sur la fin du tableau 
-			int numtoget = howmany > this.HOLDSZ ? HOLDSZ:howmany ;
+			int numtoget = howmany > Holder.HOLDSZ ? HOLDSZ:howmany ;
 			toret = new String[numtoget];
 			for (int i = numtoget;i>0;i--){
 				toret[i-numtoget]=Integer.toString((this.nextMessageNumber-1-i)%HOLDSZ)
@@ -92,3 +93,4 @@ public class Holder implements Iterator<String> {
 	 return toret;   
 	}
 }
+

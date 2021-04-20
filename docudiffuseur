@@ -51,11 +51,16 @@ SOURCE D'ACCES CONCCURRENT entre broadcastloop,receiveloop, et historygiver
 liste contenant tous les messages que le diffuseur peut diffuser ***
 * broadcastthread Thread, contient le thread de la fonction de broadcast
 * receivethread Thread, contient le thread de la fonction de receive
+* broadcastThreadIsWaiting booléen qui permet de savoir si la boucle de broadCast est entrain d'attendre sur le diffuseur qu'un nouveau message est disponible à l'envoi 
+si c'est le cas il faut notify le Holder du Diffuseur pour lui dire de reprendre son émission de messages  
 
 ___méthodes d'instances
 
 * broadcastloop() 
 boucle de diffusion envoi des messages en continu, dans un thread 
+si un message renvoyé par Holder n'est pas de la bonne taille, 
+n'envoit pas ledit message, affiche un message d'erreur sur la sortie d'erreur 
+et continue son exécution
 
 * receiveloop() boucle de réception de nouveaux messages à diffuser en continu en plus de ceux déjà présents, dans un thread.
 appelle aussi des historygiver dans des nouveaux thread lorsque des gens souhaitent avoir un historique des derniers messages envoyés
@@ -68,9 +73,15 @@ sera créé à partir de receiveloop
 * startListen () signale au diffuseur qu'il doit commencer à écouter sur le port spécifier des demandes de client ou de gestionnaire
 
 * stopServer() signale au diffuseur qu'il doit arrêter d'émettre et de recevoir.
-
+	lance des signaux d'interruptions aux deux threads
 ___champs statiques 
 
 ??
 ___méthodes statiques
-??
+main du diffuseur pour lancer un petit serveur de diffusion standalone 
+pour l'instant prend 4 arguments dans cet ordre : 
+id du diffuseur 
+port de réception tcp
+port de multicast
+adresse de multicast
+et lis une dizaine de messages manuellement. Il faut l'arrêter interrompre le programme à la main.
