@@ -3,10 +3,6 @@ import java.util.*;
 import java.io.IOException;
 
 
-/*
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-*/
 
 
 
@@ -29,12 +25,13 @@ public class Diffuseur{
 	public final boolean startBroadcast(){this.broadcastThread.start(); return true;}
 	public final boolean startListen(){this.receiveThread.start(); return true;}
 	
-	public Diffuseur(String MultiCasterID, int recvPort,  int multiCastPort, String multiCastAddress ) throws SocketException,UnknownHostException {
+	public Diffuseur(String MultiCasterID, int recvPort,  int multiCastPort, String multiCastAddress ) 
+	throws SocketException,UnknownHostException,IOException {
 		if(recvPort <0 || multiCastPort <0  || recvPort > 65535|| multiCastPort > 65535 ){
 			throw new IllegalArgumentException("Port  incorrect");
 		}
 		this.id = MultiCasterID;
-		this.rcvprt = recvPort ;
+		this.rcvPrt = recvPort ;
 		this.mltcstSock = new DatagramSocket(); // peut lancer SocketException
 		this.mltcstSock.setReuseAddress(true); // pour se faciliter la vie par la suite 
 		this.mltcstSA = new InetSocketAddress(multiCastAddress,multiCastPort);
@@ -95,26 +92,34 @@ public class Diffuseur{
 	}
 	
 	private void receiveLoop(){
+		Socket connectedSocket =new Socket(); // pour satisfaire Java
 		try{
 			while(true){
-				Socket connectedSocket = rcvSock.accept();
+				connectedSocket = rcvSock.accept();
 				byte[] mssgHeader = new byte[Prefixes.headerSZ];
-				if(Prefixes.headerSZ != connectedSocket.getInputStream.read(mssgHeader)){connectedSocket.close();continue;}
-				String 
-				switch(){
-					case Prefixes.LAST.toString(): break;
-					case Prefixes.RUOK.toString():break;
-					case Prefixes.MESS.toString():break;
-					default:connectedSocket.close();
+				if(Prefixes.headerSZ != connectedSocket.getInputStream().read(mssgHeader)){
+					connectedSocket.close();continue;
+					
 				}
+				
+				String headerCont = new String(mssgHeader);
+				if( headerCont==Prefixes.LAST.toString()){
+				}
+				else if (headerCont==Prefixes.RUOK.toString()){
+					
+				}
+				else if(Prefixes.MESS.toString() ==Prefixes.MESS.toString() ){
+					
+				}
+				else{connectedSocket.close();}//rejet de la connexion
+				
+				if(this.receiveThread.isInterrupted()){throw new InterruptedException();}
 			}
 		}catch(InterruptedException end){ 
-			
-			rcvSock.close();
-			connectedSocket.close();
-			
+			try{rcvSock.close();}catch(IOException e){}
+			try{connectedSocket.close();}catch(IOException e){};
 			// code en cas de demande d'interruption du thread 
-			}
+			}catch(IOException e){}
 	}
 	
 	private void historygiver(){
@@ -133,7 +138,7 @@ public class Diffuseur{
 		return;
 	}
 	public synchronized int getBroadcastPort(){return this.mltcstSock.getLocalPort();}
-	public synchronized int getReceivePort(){return this.rcvprt;}
+	public synchronized int getReceivePort(){return this.rcvPrt;}
 	public synchronized long getFrequency(){return this.frqcy;}
 	public synchronized void setFrequency(long newFreq){this.frqcy = newFreq;}
 	private synchronized DatagramSocket getMulticastSock(){return this.mltcstSock;}
