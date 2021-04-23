@@ -1,7 +1,7 @@
 import java.net.*;
 import java.util.*;
 import java.io.IOException;
-
+import java.io.*;
 
 
 
@@ -24,6 +24,7 @@ public class Diffuseur{
 	private  Thread receiveThread;
 	public final boolean startBroadcast(){this.broadcastThread.start(); return true;}
 	public final boolean startListen(){this.receiveThread.start(); return true;}
+	public static final int MAXHISTORY = 999;
 	
 	public Diffuseur(String MultiCasterID, int recvPort,  int multiCastPort, String multiCastAddress ) 
 	throws SocketException,UnknownHostException,IOException {
@@ -99,16 +100,18 @@ public class Diffuseur{
 				byte[] mssgHeader = new byte[Prefixes.headerSZ];
 				if(Prefixes.headerSZ != connectedSocket.getInputStream().read(mssgHeader)){
 					connectedSocket.close();continue;
-					
 				}
 				
 				String headerCont = new String(mssgHeader);
-				if( headerCont==Prefixes.LAST.toString()){
+				if( headerCont.equals(Prefixes.LAST.toString())){
+					Socket temp =connectedSocket;
+					new Thread(()->{this.historygiver(temp);});
+					
 				}
 				else if (headerCont==Prefixes.RUOK.toString()){
 					
 				}
-				else if(Prefixes.MESS.toString() ==Prefixes.MESS.toString() ){
+				else if(headerCont ==Prefixes.MESS.toString() ){
 					
 				}
 				else{connectedSocket.close();}//rejet de la connexion
@@ -122,8 +125,51 @@ public class Diffuseur{
 			}catch(IOException e){}
 	}
 	
-	private void historygiver(){
-	
+	private  void historygiver(Socket commSock){
+		if(null==commSock){throw new NullPointerException();}
+		if(commSock.isClosed()){return;}
+		try{
+			byte[] mssgContent = new byte[Prefixes.LAST.normalMessLength -Prefixes.headerSZ];
+			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ != commSock.getInputStream().read(mssgContent)){
+				commSock.close();return;
+			}
+			int howmanyasked;
+			try {
+				howmanyasked = Integer.valueOf(new String(mssgContent));
+			}catch(NumberFormatException ne){ commSock.close(); return;}
+			String tosend [] ;
+			synchronized(this.msgHolder){
+				tosend = this.msgHolder.retrieveHistory(howmanyasked%Diffuseur.MAXHISTORY);
+			}
+			if (tosend.length == 0 && tosend[0].equals("")){
+				commSock.getOutputStream().write(Prefixes.ENDM.toString().getBytes());
+				commSock.close();
+				return;}
+				String entete = Prefixes.OLDM.toString();
+				OutputStream wheretosend = commSock.getOutputStream();
+ 			for (String mess : tosend){
+				String finalpack= Prefixes.OLDM.toString()+" "+mess;
+				if(finalpack.getBytes().length != Prefixes.OLDM.normalMessLength){
+					System.err.println("/!\\ Attention le message suivant de taille incorrecte à failli être fourni comme historique"
+						+"\nle message :\""+finalpack
+						+"\"\n Longueur attendue " 
+						+Prefixes.OLDM.normalMessLength
+						+", longueur obtenue :"+finalpack.length()+"\n"
+					);
+					
+				}
+				wheretosend.write(finalpack.getBytes());	
+			}
+			wheretosend.write(Prefixes.ENDM.toString().getBytes());
+			commSock.close();
+			return;
+		/*}catch(InterruptedException e){
+			commSock.close();
+			return;*/
+		}catch(IOException ioe){
+			System.err.println("problème d'envoi d'historique à un client ");
+			ioe.printStackTrace(System.err);return ;
+		}
 	}
 	
 	public void stopServer(){
@@ -154,6 +200,7 @@ public class Diffuseur{
 				temp = sc.nextLine();
 				System.out.println("Ajout du message : "+temp);
 				lediff.addAMessage(new Message("M0ral3s",temp));
+				
 			}
 		}catch(NoSuchElementException ns){return;}
 		synchronized(lediff.msgHolder) {

@@ -73,6 +73,7 @@ public class Holder implements Iterator<String> {
 	
 	
 	public synchronized String[] retrieveHistory(int howmany){
+		if(0>=howmany){return new String[0]; }
 	    String [] toret;
 	    if((!( howmany> this.nextMessageNumber )) || Holder.HOLDSZ > this.historyOccupation){
 			//  nb messages demandés < indice || trops de messages demandés : pas à /impossible boucler en fin de tableau			
