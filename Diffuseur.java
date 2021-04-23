@@ -1,7 +1,7 @@
 import java.net.*;
 import java.util.*;
 import java.io.IOException;
-
+import java.io.*;
 
 
 
@@ -91,12 +91,46 @@ public class Diffuseur{
 		}
 	}
 	
+	private void mafonction(Socket so){}
+		try(//envoie
+        PrintWriter out = new PrintWriter(so.getOutputStream());
+        //recoit
+		BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));)
+		{
+			System.out.println("heeyheyyeeh");
+			//on recoit 
+			String recu=in.readLine();
+			System.out.println("recuuuu "+recu);
+			String id=recu.substring(0,8);
+			System.out.println("id "+id);
+			String mess=recu.substring(9, 140);
+			System.out.println("mess "+mess);
+			this.addAMessage(new Message(id, mess));
+			out.print("ACKM\n\r");
+
+			out.flush();
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
 	private void receiveLoop(){
 		Socket connectedSocket =new Socket(); // pour satisfaire Java
 		try{
 			while(true){
 				connectedSocket = rcvSock.accept();
+				//envoie
+				//PrintWriter out = new PrintWriter(connectedSocket.getOutputStream());
+                //recoit
+                //BufferedReader in = new BufferedReader(new InputStreamReader(connectedSocket.getInputStream()));
 				byte[] mssgHeader = new byte[Prefixes.headerSZ];
+
+				//String mess = in.readLine();
+				// System.out.println("recu "+connectedSocket.getInputStream().read(mssgHeader));
+				// String headerCont = new String(mssgHeader);
+				// System.out.println(headerCont);
+				// System.out.println("recu"+in.readLine());
 				if(Prefixes.headerSZ != connectedSocket.getInputStream().read(mssgHeader)){
 					connectedSocket.close();continue;
 					
@@ -104,11 +138,18 @@ public class Diffuseur{
 				
 				String headerCont = new String(mssgHeader);
 				if( headerCont==Prefixes.LAST.toString()){
+					
 				}
 				else if (headerCont==Prefixes.RUOK.toString()){
 					
 				}
-				else if(Prefixes.MESS.toString() ==Prefixes.MESS.toString() ){
+				else if(headerCont.equals(Prefixes.MESS.toString())){
+					System.out.println("HEY");
+					Socket temp=connectedSocket;
+					new Thread(()->{this.mafonction(temp);});
+					//temp.close();
+					//connectedSocket.close();
+
 					
 				}
 				else{connectedSocket.close();}//rejet de la connexion
@@ -137,6 +178,7 @@ public class Diffuseur{
 		this.msgHolder.add(m);}
 		return;
 	}
+	
 	public synchronized int getBroadcastPort(){return this.mltcstSock.getLocalPort();}
 	public synchronized int getReceivePort(){return this.rcvPrt;}
 	public synchronized long getFrequency(){return this.frqcy;}
