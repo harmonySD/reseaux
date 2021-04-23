@@ -91,7 +91,8 @@ public class Diffuseur{
 		}
 	}
 	
-	private void mafonction(Socket so){}
+	private void mafonction(Socket so){
+
 		try(//envoie
         PrintWriter out = new PrintWriter(so.getOutputStream());
         //recoit
