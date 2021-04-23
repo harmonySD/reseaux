@@ -98,7 +98,6 @@ public class Diffuseur{
         //recoit
 		BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));)
 		{
-			System.out.println("heeyheyyeeh");
 			//on recoit 
 			String recu=in.readLine();
 			System.out.println("recuuuu "+recu);
@@ -110,6 +109,7 @@ public class Diffuseur{
 			out.print("ACKM\n\r");
 
 			out.flush();
+			so.close();
 
 		}catch(Exception e){
 			e.printStackTrace();
@@ -148,8 +148,6 @@ public class Diffuseur{
 					System.out.println("HEY");
 					Socket temp=connectedSocket;
 					new Thread(()->{this.mafonction(temp);}).start();
-					//temp.close();
-					//connectedSocket.close();
 
 					
 				}
