@@ -147,7 +147,7 @@ public class Diffuseur{
 				else if(headerCont.equals(Prefixes.MESS.toString())){
 					System.out.println("HEY");
 					Socket temp=connectedSocket;
-					new Thread(()->{this.mafonction(temp);});
+					new Thread(()->{this.mafonction(temp);}).start();
 					//temp.close();
 					//connectedSocket.close();
 
