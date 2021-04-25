@@ -17,13 +17,14 @@ public class Diffuseur{
 	private ServerSocket rcvSock;
 	private InetSocketAddress mltcstSA;
 	private DatagramSocket mltcstSock;
-	private  long frqcy= 5000;
+	private  long frqcy= 500;
 	private Holder msgHolder  ; // ACCES CONCURRENT
 	private  Thread broadcastThread ;
 	private  boolean broadcastThreadIsWaiting = false; // le SEUL modifieur est broadCastLoop
 	private  Thread receiveThread;
 	public final boolean startBroadcast(){this.broadcastThread.start(); return true;}
 	public final boolean startListen(){this.receiveThread.start(); return true;}
+	public static final int MAXHISTORY = 999;
 	
 	public Diffuseur(String MultiCasterID, int recvPort,  int multiCastPort, String multiCastAddress ) 
 	throws SocketException,UnknownHostException,IOException {
@@ -146,12 +147,14 @@ public class Diffuseur{
 				// System.out.println("recu"+in.readLine());
 				if(Prefixes.headerSZ != connectedSocket.getInputStream().read(mssgHeader)){
 					connectedSocket.close();continue;
-					
 				}
 				
 				String headerCont = new String(mssgHeader);
 				if( headerCont.equals(Prefixes.LAST.toString())){
-					System.out.println("OKOOKKKOKOKKOOK");
+				try{	Socket temp =connectedSocket;
+					new Thread(()->{this.historygiver(temp);}).start();
+				}catch(Exception e){
+					System.err.println(" Une erreur est apparue lors d'une demande d'historique: "+e.toString());}
 				}
 				else if (headerCont.equals(Prefixes.RUOK.toString())){
 					System.out.println("TTTTTTT");
@@ -177,8 +180,53 @@ public class Diffuseur{
 			}catch(IOException e){}
 	}
 	
-	private void historygiver(){
-	
+	private  void historygiver(Socket commSock){
+		if(null==commSock){throw new NullPointerException();}
+		if(commSock.isClosed()){return;}
+		try{
+			BufferedReader bfred=new BufferedReader(new InputStreamReader(commSock.getInputStream()));
+			String mssgContent = bfred.readLine();
+			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ  != mssgContent.length()
+					|| bfred.ready()){
+				commSock.close();return;
+			}
+			int howmanyasked;
+			try {
+				howmanyasked = Integer.valueOf(new String(mssgContent).trim());
+			}catch(NumberFormatException ne){ commSock.close(); return;}
+			String tosend [] ;
+			if(howmanyasked<0) {commSock.close(); return;}
+			synchronized(this.msgHolder){
+				tosend = this.msgHolder.retrieveHistory(howmanyasked%Diffuseur.MAXHISTORY);
+			}
+			if (tosend.length == 0){
+				commSock.getOutputStream().write(Prefixes.ENDM.toString().getBytes());
+				commSock.close();
+				return;}
+				String entete = Prefixes.OLDM.toString();
+				OutputStream wheretosend = commSock.getOutputStream();
+ 			for (String mess : tosend){
+				String finalpack= Prefixes.OLDM.toString()+" "+mess;
+				if(finalpack.getBytes().length != Prefixes.OLDM.normalMessLength){
+					System.err.println("/!\\ Attention le message suivant de taille incorrecte à failli être fourni comme historique"
+						+"\nle message :\""+finalpack
+						+"\"\n Longueur attendue " 
+						+Prefixes.OLDM.normalMessLength
+						+", longueur obtenue :"+finalpack.getBytes().length+"\n"
+					);
+					continue;
+				}
+				wheretosend.write(finalpack.getBytes());	
+			}
+			wheretosend.write(Prefixes.ENDM.toString().getBytes());
+			return;
+		/*}catch(InterruptedException e){
+			commSock.close();
+			return;*/
+		}catch(IOException ioe){
+			System.err.println("problème d'envoi d'historique à un client ");
+			ioe.printStackTrace(System.err);return ;
+		}finally{try {commSock.close();} catch(IOException e){}}
 	}
 	
 	public void stopServer(){
@@ -206,10 +254,10 @@ public class Diffuseur{
 		try{
 			Scanner sc = new Scanner(System.in);
 			String temp;
-			for(int i =0;i<10;i++){
+			for(int i =0;i<15;i++){
 				temp = sc.nextLine();
 				System.out.println("Ajout du message : "+temp);
-				lediff.addAMessage(new Message("M0ral3s",temp));
+				lediff.addAMessage(new Message("M0ral3s",temp));	
 			}
 		}catch(NoSuchElementException ns){return;}
 		synchronized(lediff.msgHolder) {
@@ -223,6 +271,9 @@ public class Diffuseur{
 		}catch(Exception e){}
 	}
 }
+
+	
+	
 
 	
 	

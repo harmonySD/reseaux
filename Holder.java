@@ -1,7 +1,7 @@
-
 import java.util.concurrent.*;
 import java.util.Iterator;
 import java.util.*;
+
 public class Holder implements Iterator<String> {
 
 
@@ -43,54 +43,29 @@ public class Holder implements Iterator<String> {
 		this.nextMessageNumber=(this.nextMessageNumber  +1 )%HOLDSZ;
 		return toret;// la taille de toret doit être 
 	}
-		/*
-	public synchronized String[] retrieveHistory(int howmany){ // /!\ renvoit un tableau de String avec un null si historique vide !
-		// fonction de récupération de l'historique des messages, du plus récent à la position 0 au plus ancien  
-		String [] toret;
-		if (howmany> this.historyOccupation){//vérifier la condition et remplacer si nécessaire pour avoir renvoit correct si historique plein ou non
-			//tableau n'est pas plein et/ou trop de mssages demandés
-			toret = new String[this.historyOccupation];
-			for (int i = this.historyOccupation-1;i>-1;i--){
-				toret[this.historyOccupation-1-i]=Integer.toString(i)+" "+this.HistoryQueue[i].toString();
-				//les messages sont rangés dans toret du plus récent au plus ancien
-			}
-		}
-		else if (howmany<=this.nextMessageNumber-1){
-			// si pas trop de messages demandés ET on peut
-			//juste remonter le tableau de l'historique bêtement sans avoir à faire de saut
-		toret = new String[howmany];
-			for (int i = howmany-1;i>-1;i--){
-				toret[howmany-1-i]=Integer.toString((this.nextMessageNumber-1-i))+" "+this.HistoryQueue[this.nextMessageNumber-1-i].toString();
-			}
-		}else{// howmany> this.nextMessagenumber-1
-		toret = new String[howmany];
-			for (int i = howmany-1;i>-1;i--){
-				toret[howmany-1-i]=Integer.toString(this.nextMessageNumber-1-i%HOLDSZ)+" "+this.HistoryQueue[this.nextMessageNumber-1-i%HOLDSZ].toString();
-			}
-		}
-			return toret;
-	}*/
-	
 	
 	public synchronized String[] retrieveHistory(int howmany){
+		if(1>howmany){return new String[0]; }
 	    String [] toret;
-	    if((!( howmany> this.nextMessageNumber )) || Holder.HOLDSZ > this.historyOccupation){
-			//  nb messages demandés < indice || trops de messages demandés : pas à /impossible boucler en fin de tableau			
-			toret = new String[howmany];
-	        for (int i = howmany-1;i>-1;i--){
-				toret[howmany-1-i]=Integer.toString((this.nextMessageNumber-1-i))+" "+this.HistoryQueue[this.nextMessageNumber-1-i].toString();
+	    if(( howmany< this.nextMessageNumber ) || Holder.HOLDSZ > this.historyOccupation){
+			//  nb messages demandés < indice || impossible boucler en fin de tableau car pas plein (sinon HOLDSZ == historyOccupation)
+	    	//trop de messages ont étés demandés, on 
+			int nbret= howmany<this.nextMessageNumber-1?howmany:this.nextMessageNumber-1;
+	    	toret = new String[nbret];
+	        for (int i = nbret-1;i>-1;i--){
+				toret[nbret-i-1]=String.format("%03d",(this.nextMessageNumber-1-i))+" "+this.HistoryQueue[this.nextMessageNumber-1-i].toString();
 			}
 	    }else{
 			// il faut reboucler sur la fin du tableau 
 			int numtoget = howmany > Holder.HOLDSZ ? HOLDSZ:howmany ;
 			toret = new String[numtoget];
+
 			for (int i = numtoget;i>0;i--){
-				toret[i-numtoget]=Integer.toString((this.nextMessageNumber-1-i)%HOLDSZ)
+				toret[numtoget-i]=String.format("%03d",((i-this.nextMessageNumber)%(HOLDSZ)))
 				+" "
-				+this.HistoryQueue[this.nextMessageNumber-1-i%HOLDSZ].toString();
+				+this.HistoryQueue[(i-this.nextMessageNumber)%(HOLDSZ)].toString();
 			}
 		}
 	 return toret;   
 	}
 }
-
