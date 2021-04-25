@@ -155,8 +155,8 @@ public class Diffuseur{
 				}
 				else if (headerCont.equals(Prefixes.RUOK.toString())){
 					System.out.println("TTTTTTT");
-					//Socket temp=connectedSocket;
-					//new Thread(()->{this.diffAlive(temp);}).start();
+					Socket temp=connectedSocket;
+					new Thread(()->{this.diffAlive(temp);}).start();
 
 				}
 				else if(headerCont.equals(Prefixes.MESS.toString())){
