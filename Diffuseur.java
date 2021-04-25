@@ -91,7 +91,7 @@ public class Diffuseur{
 		}
 	}
 	
-	private void mafonction(Socket so){
+	private void sendMess(Socket so){
 
 		try(//envoie
         PrintWriter out = new PrintWriter(so.getOutputStream());
@@ -111,6 +111,18 @@ public class Diffuseur{
 			out.flush();
 			so.close();
 
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	private void diffAlive(Socket so){
+		try (
+			PrintWriter out = new PrintWriter(so.getOutputStream());
+		){
+			out.print("IMOK\n\r");
+			out.flush();
+			so.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -138,16 +150,19 @@ public class Diffuseur{
 				}
 				
 				String headerCont = new String(mssgHeader);
-				if( headerCont==Prefixes.LAST.toString()){
-					
+				if( headerCont.equals(Prefixes.LAST.toString())){
+					System.out.println("OKOOKKKOKOKKOOK");
 				}
-				else if (headerCont==Prefixes.RUOK.toString()){
-					
+				else if (headerCont.equals(Prefixes.RUOK.toString())){
+					System.out.println("TTTTTTT");
+					//Socket temp=connectedSocket;
+					//new Thread(()->{this.diffAlive(temp);}).start();
+
 				}
 				else if(headerCont.equals(Prefixes.MESS.toString())){
 					System.out.println("HEY");
 					Socket temp=connectedSocket;
-					new Thread(()->{this.mafonction(temp);}).start();
+					new Thread(()->{this.sendMess(temp);}).start();
 					//connectedSocket.close();
 					
 				}
