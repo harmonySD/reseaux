@@ -105,7 +105,7 @@ public class Diffuseur{
 				String headerCont = new String(mssgHeader);
 				if( headerCont.equals(Prefixes.LAST.toString())){
 					Socket temp =connectedSocket;
-					new Thread(()->{this.historygiver(temp);});
+					new Thread(()->{this.historygiver(temp);}).start();
 					
 				}
 				else if (headerCont==Prefixes.RUOK.toString()){
