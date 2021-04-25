@@ -148,7 +148,7 @@ public class Diffuseur{
 					System.out.println("HEY");
 					Socket temp=connectedSocket;
 					new Thread(()->{this.mafonction(temp);}).start();
-
+					//connectedSocket.close();
 					
 				}
 				else{connectedSocket.close();}//rejet de la connexion
