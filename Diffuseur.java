@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.*;
 
 
-
-
 /**
  * classe du diffuseur 
  * **/
@@ -134,17 +132,7 @@ public class Diffuseur{
 		try{
 			while(true){
 				connectedSocket = rcvSock.accept();
-				//envoie
-				//PrintWriter out = new PrintWriter(connectedSocket.getOutputStream());
-                //recoit
-                //BufferedReader in = new BufferedReader(new InputStreamReader(connectedSocket.getInputStream()));
 				byte[] mssgHeader = new byte[Prefixes.headerSZ];
-
-				//String mess = in.readLine();
-				// System.out.println("recu "+connectedSocket.getInputStream().read(mssgHeader));
-				// String headerCont = new String(mssgHeader);
-				// System.out.println(headerCont);
-				// System.out.println("recu"+in.readLine());
 				if(Prefixes.headerSZ != connectedSocket.getInputStream().read(mssgHeader)){
 					connectedSocket.close();continue;
 				}
@@ -157,13 +145,11 @@ public class Diffuseur{
 					System.err.println(" Une erreur est apparue lors d'une demande d'historique: "+e.toString());}
 				}
 				else if (headerCont.equals(Prefixes.RUOK.toString())){
-					System.out.println("TTTTTTT");
 					Socket temp=connectedSocket;
 					new Thread(()->{this.diffAlive(temp);}).start();
 
 				}
 				else if(headerCont.equals(Prefixes.MESS.toString())){
-					System.out.println("HEY");
 					Socket temp=connectedSocket;
 					new Thread(()->{this.sendMess(temp);}).start();
 					//connectedSocket.close();
@@ -171,9 +157,9 @@ public class Diffuseur{
 				}
 				else{connectedSocket.close();}//rejet de la connexion
 				
-				if(this.receiveThread.isInterrupted()){throw new InterruptedException();}
+				if(this.receiveThread.isInterrupted()){throw new InterruptedException();} // demande de fin du thread
 			}
-		}catch(InterruptedException end){ 
+		}catch(InterruptedException end){
 			try{rcvSock.close();}catch(IOException e){}
 			try{connectedSocket.close();}catch(IOException e){};
 			// code en cas de demande d'interruption du thread 
@@ -238,6 +224,9 @@ public class Diffuseur{
 		if (m== null){return;}
 		synchronized (this.msgHolder){
 		this.msgHolder.add(m);}
+		if (!this.broadcastThreadIsWaiting){
+			this.msgHolder.notify();
+		}
 		return;
 	}
 	
@@ -272,8 +261,3 @@ public class Diffuseur{
 	}
 }
 
-	
-	
-
-	
-	
