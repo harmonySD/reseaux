@@ -130,14 +130,16 @@ public class Diffuseur{
 		if(commSock.isClosed()){return;}
 		try{
 			byte[] mssgContent = new byte[Prefixes.LAST.normalMessLength -Prefixes.headerSZ];
-			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ != commSock.getInputStream().read(mssgContent)){
+			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ != commSock.getInputStream().read(mssgContent)
+					||commSock.getInputStream().available()!=0 ){
 				commSock.close();return;
 			}
 			int howmanyasked;
 			try {
-				howmanyasked = Integer.valueOf(new String(mssgContent));
+				howmanyasked = Integer.valueOf(new String(mssgContent).trim());
 			}catch(NumberFormatException ne){ commSock.close(); return;}
 			String tosend [] ;
+			if(howmanyasked<0) {commSock.close(); return;}
 			synchronized(this.msgHolder){
 				tosend = this.msgHolder.retrieveHistory(howmanyasked%Diffuseur.MAXHISTORY);
 			}
@@ -214,6 +216,9 @@ public class Diffuseur{
 		}catch(Exception e){}
 	}
 }
+
+	
+	
 
 	
 	
