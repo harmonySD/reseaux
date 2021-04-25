@@ -104,9 +104,10 @@ public class Diffuseur{
 				
 				String headerCont = new String(mssgHeader);
 				if( headerCont.equals(Prefixes.LAST.toString())){
-					Socket temp =connectedSocket;
+				try{	Socket temp =connectedSocket;
 					new Thread(()->{this.historygiver(temp);}).start();
-					
+				}catch(Exception e){
+					System.err.println(" Une erreur est apparue lors d'une demande d'historique: "+e.toString());}
 				}
 				else if (headerCont==Prefixes.RUOK.toString()){
 					
@@ -164,7 +165,6 @@ public class Diffuseur{
 				wheretosend.write(finalpack.getBytes());	
 			}
 			wheretosend.write(Prefixes.ENDM.toString().getBytes());
-			commSock.close();
 			return;
 		/*}catch(InterruptedException e){
 			commSock.close();
@@ -172,7 +172,7 @@ public class Diffuseur{
 		}catch(IOException ioe){
 			System.err.println("problème d'envoi d'historique à un client ");
 			ioe.printStackTrace(System.err);return ;
-		}
+		}finally{try {commSock.close();} catch(IOException e){}}
 	}
 	
 	public void stopServer(){
