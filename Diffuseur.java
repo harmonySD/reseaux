@@ -92,12 +92,59 @@ public class Diffuseur{
 		}
 	}
 	
+	private void sendMess(Socket so){
+
+		try(//envoie
+        PrintWriter out = new PrintWriter(so.getOutputStream());
+        //recoit
+		BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));)
+		{
+			//on recoit 
+			String recu=in.readLine();
+			System.out.println("recuuuu "+recu);
+			String id=recu.substring(0,8);
+			System.out.println("id "+id);
+			String mess=recu.substring(9, 140);
+			System.out.println("mess "+mess);
+			this.addAMessage(new Message(id, mess));
+			out.print("ACKM\n\r");
+
+			out.flush();
+			so.close();
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	private void diffAlive(Socket so){
+		try (
+			PrintWriter out = new PrintWriter(so.getOutputStream());
+		){
+			out.print("IMOK\n\r");
+			out.flush();
+			so.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
 	private void receiveLoop(){
 		Socket connectedSocket =new Socket(); // pour satisfaire Java
 		try{
 			while(true){
 				connectedSocket = rcvSock.accept();
+				//envoie
+				//PrintWriter out = new PrintWriter(connectedSocket.getOutputStream());
+                //recoit
+                //BufferedReader in = new BufferedReader(new InputStreamReader(connectedSocket.getInputStream()));
 				byte[] mssgHeader = new byte[Prefixes.headerSZ];
+
+				//String mess = in.readLine();
+				// System.out.println("recu "+connectedSocket.getInputStream().read(mssgHeader));
+				// String headerCont = new String(mssgHeader);
+				// System.out.println(headerCont);
+				// System.out.println("recu"+in.readLine());
 				if(Prefixes.headerSZ != connectedSocket.getInputStream().read(mssgHeader)){
 					connectedSocket.close();continue;
 				}
@@ -109,10 +156,17 @@ public class Diffuseur{
 				}catch(Exception e){
 					System.err.println(" Une erreur est apparue lors d'une demande d'historique: "+e.toString());}
 				}
-				else if (headerCont==Prefixes.RUOK.toString()){
-					
+				else if (headerCont.equals(Prefixes.RUOK.toString())){
+					System.out.println("TTTTTTT");
+					Socket temp=connectedSocket;
+					new Thread(()->{this.diffAlive(temp);}).start();
+
 				}
-				else if(headerCont ==Prefixes.MESS.toString() ){
+				else if(headerCont.equals(Prefixes.MESS.toString())){
+					System.out.println("HEY");
+					Socket temp=connectedSocket;
+					new Thread(()->{this.sendMess(temp);}).start();
+					//connectedSocket.close();
 					
 				}
 				else{connectedSocket.close();}//rejet de la connexion
@@ -186,6 +240,7 @@ public class Diffuseur{
 		this.msgHolder.add(m);}
 		return;
 	}
+	
 	public synchronized int getBroadcastPort(){return this.mltcstSock.getLocalPort();}
 	public synchronized int getReceivePort(){return this.rcvPrt;}
 	public synchronized long getFrequency(){return this.frqcy;}
