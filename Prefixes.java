@@ -1,5 +1,3 @@
-
-
 public enum Prefixes {
 	// liste uniformisée de tous les 
 	// préfixe admissible sur le réseau
@@ -7,7 +5,7 @@ public enum Prefixes {
 	,MESS(154)
 	,ACKM(4)
 	,LAST(8)
-	,OLDM(DIFF.normalMessLength)
+	,OLDM(160)
 	,ENDM(1417) //FIXME quelle taille attendue ici ?
 	,REGI(1417) // FIXME quelle taille attendue ici ?
 	,REOK(4)

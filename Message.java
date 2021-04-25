@@ -1,5 +1,3 @@
-
-
 public class Message {
 	// tailles fixée des données / nom utilisateur
 	public static final int IDSZ=8;

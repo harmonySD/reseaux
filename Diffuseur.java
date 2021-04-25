@@ -17,7 +17,7 @@ public class Diffuseur{
 	private ServerSocket rcvSock;
 	private InetSocketAddress mltcstSA;
 	private DatagramSocket mltcstSock;
-	private  long frqcy= 5000;
+	private  long frqcy= 500;
 	private Holder msgHolder  ; // ACCES CONCURRENT
 	private  Thread broadcastThread ;
 	private  boolean broadcastThreadIsWaiting = false; // le SEUL modifieur est broadCastLoop
@@ -129,9 +129,10 @@ public class Diffuseur{
 		if(null==commSock){throw new NullPointerException();}
 		if(commSock.isClosed()){return;}
 		try{
-			byte[] mssgContent = new byte[Prefixes.LAST.normalMessLength -Prefixes.headerSZ];
-			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ != commSock.getInputStream().read(mssgContent)
-					||commSock.getInputStream().available()!=0 ){
+			BufferedReader bfred=new BufferedReader(new InputStreamReader(commSock.getInputStream()));
+			String mssgContent = bfred.readLine();
+			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ  != mssgContent.length()
+					|| bfred.ready()){
 				commSock.close();return;
 			}
 			int howmanyasked;
@@ -143,7 +144,7 @@ public class Diffuseur{
 			synchronized(this.msgHolder){
 				tosend = this.msgHolder.retrieveHistory(howmanyasked%Diffuseur.MAXHISTORY);
 			}
-			if (tosend.length == 0 && tosend[0].equals("")){
+			if (tosend.length == 0){
 				commSock.getOutputStream().write(Prefixes.ENDM.toString().getBytes());
 				commSock.close();
 				return;}
@@ -156,9 +157,9 @@ public class Diffuseur{
 						+"\nle message :\""+finalpack
 						+"\"\n Longueur attendue " 
 						+Prefixes.OLDM.normalMessLength
-						+", longueur obtenue :"+finalpack.length()+"\n"
+						+", longueur obtenue :"+finalpack.getBytes().length+"\n"
 					);
-					
+					continue;
 				}
 				wheretosend.write(finalpack.getBytes());	
 			}
@@ -198,11 +199,10 @@ public class Diffuseur{
 		try{
 			Scanner sc = new Scanner(System.in);
 			String temp;
-			for(int i =0;i<10;i++){
+			for(int i =0;i<15;i++){
 				temp = sc.nextLine();
 				System.out.println("Ajout du message : "+temp);
-				lediff.addAMessage(new Message("M0ral3s",temp));
-				
+				lediff.addAMessage(new Message("M0ral3s",temp));	
 			}
 		}catch(NoSuchElementException ns){return;}
 		synchronized(lediff.msgHolder) {
