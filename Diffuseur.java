@@ -1,3 +1,4 @@
+package mpdrdebog;
 import java.net.*;
 import java.util.*;
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class Diffuseur{
 		this.rcvSock = new ServerSocket(this.rcvPrt);
 		this.rcvSock.setReuseAddress(true);
 		
+		
 		this.startListen();
 		this.startBroadcast();
 	}
@@ -77,8 +79,7 @@ public class Diffuseur{
 						this.broadcastThreadIsWaiting = true;
 						synchronized(this.msgHolder){
 							msgHolder.wait();
-						}
-						this.broadcastThreadIsWaiting = false;
+						}this.broadcastThreadIsWaiting = false;
 						continue;
 				}catch (IOException ioex){
 					System.err.println(ioex.toString());
@@ -90,7 +91,7 @@ public class Diffuseur{
 		}
 	}
 	
-	private void sendMess(Socket so){
+	private void sendMess(Socket so)throws IOException{
 
 		try(//envoie
         PrintWriter out = new PrintWriter(so.getOutputStream());
@@ -110,67 +111,71 @@ public class Diffuseur{
 			out.flush();
 			so.close();
 
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		}finally {}
 	}
 
-	private void diffAlive(Socket so){
+	private void diffAlive(Socket so)throws IOException{
 		try (
 			PrintWriter out = new PrintWriter(so.getOutputStream());
 		){
 			out.print("IMOK\n\r");
 			out.flush();
 			so.close();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		}finally {}
 	}
 
 	private void receiveLoop(){
-		Socket connectedSocket =new Socket(); // pour satisfaire Java
 		try{
-			while(true){
-				connectedSocket = rcvSock.accept();
-				byte[] mssgHeader = new byte[Prefixes.headerSZ];
-				if(Prefixes.headerSZ != connectedSocket.getInputStream().read(mssgHeader)){
-					connectedSocket.close();continue;
-				}
-				
-				String headerCont = new String(mssgHeader);
-				if( headerCont.equals(Prefixes.LAST.toString())){
-				try{	Socket temp =connectedSocket;
-					new Thread(()->{this.historygiver(temp);}).start();
-				}catch(Exception e){
-					System.err.println(" Une erreur est apparue lors d'une demande d'historique: "+e.toString());}
-				}
-				else if (headerCont.equals(Prefixes.RUOK.toString())){
-					Socket temp=connectedSocket;
-					new Thread(()->{this.diffAlive(temp);}).start();
-
-				}
-				else if(headerCont.equals(Prefixes.MESS.toString())){
-					Socket temp=connectedSocket;
-					new Thread(()->{this.sendMess(temp);}).start();
-					//connectedSocket.close();
-					
-				}
-				else{connectedSocket.close();}//rejet de la connexion
-				
-				if(this.receiveThread.isInterrupted()){throw new InterruptedException();} // demande de fin du thread
+			while(!Thread.interrupted()){
+				Socket connectedSocket = rcvSock.accept();
+				System.out.println("Quelqu'un s'est connecté en TCP au diffuseur :"+connectedSocket.toString());
+				Thread t =new Thread(()->{this.receiveLoopSwitchMan(connectedSocket);});
+				t.setDaemon(true);
+				t.start();
 			}
-		}catch(InterruptedException end){
-			try{rcvSock.close();}catch(IOException e){}
-			try{connectedSocket.close();}catch(IOException e){};
-			// code en cas de demande d'interruption du thread 
-			}catch(IOException e){}
+		}catch(Exception e){}
 	}
 	
+	private void receiveLoopSwitchMan(Socket connSock) {
+		try{
+			byte[] mssgHeader = new byte[Prefixes.headerSZ];
+			if(Prefixes.headerSZ != connSock.getInputStream().read(mssgHeader)){
+				connSock.close();return;
+			}
+			String headerCont = new String(mssgHeader);
+			if( headerCont.equals(Prefixes.LAST.toString())){
+				try{
+					System.out.println("L'entité connecté "+connSock.toString()+"souhaite récupérer des messages");
+					this.historygiver(connSock);
+				}catch(Exception e){
+					System.err.println(" Une erreur est apparue lors d'une demande d'historique: "+e.toString());
+				}
+			}else if (headerCont.equals(Prefixes.RUOK.toString())){
+				try{
+					System.out.println("L'entité connecté "+connSock.toString()+"souhaite savoir si le diffuseur est en ligne");
+					this.diffAlive(connSock);
+				}catch(Exception e){
+					System.err.println(" Une erreur est apparue lors d'une Vérification RUOK par un gestionnaire "+e.toString());
+				}
+			}else if(headerCont.equals(Prefixes.MESS.toString())){
+				try{
+					System.out.println("L'entité connecté "+connSock.toString()+"souhaite fournir un message à diffuser");
+					this.sendMess(connSock);
+				}catch(Exception e){
+					System.err.println(" Une erreur est apparue lors d'un ajout de message d'un client "+"\n"+e.toString());
+				}
+			}else{connSock.close();
+				System.err.println("Un message avec un en-tête non reconnu a été envoyé, la connexion a été rompue \n l'en-tête :"+headerCont);
+			}//rejet de la connexion
+		}catch(IOException e){System.err.println(" Une erreur E/S est apparue lors de l'aiguillage "+e.toString());}
+		finally{
+			try{connSock.close();}catch(IOException e){};
+		}
+	}
 	private  void historygiver(Socket commSock){
 		if(null==commSock){throw new NullPointerException();}
 		if(commSock.isClosed()){return;}
-		try{
-			BufferedReader bfred=new BufferedReader(new InputStreamReader(commSock.getInputStream()));
+		try(BufferedReader bfred=new BufferedReader(new InputStreamReader(commSock.getInputStream()));commSock;){
 			String mssgContent = bfred.readLine();
 			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ  != mssgContent.length()
 					|| bfred.ready()){
@@ -194,7 +199,8 @@ public class Diffuseur{
  			for (String mess : tosend){
 				String finalpack= Prefixes.OLDM.toString()+" "+mess;
 				if(finalpack.getBytes().length != Prefixes.OLDM.normalMessLength){
-					System.err.println("/!\\ Attention le message suivant de taille incorrecte à failli être fourni comme historique"
+					System.err.println("/!\\ Attention le message suivant de taille incorrecte à failli être fourni comme historique à"
+						+commSock.toString()
 						+"\nle message :\""+finalpack
 						+"\"\n Longueur attendue " 
 						+Prefixes.OLDM.normalMessLength
@@ -205,14 +211,11 @@ public class Diffuseur{
 				wheretosend.write(finalpack.getBytes());	
 			}
 			wheretosend.write(Prefixes.ENDM.toString().getBytes());
+			System.out.println("un historique a été fourni avec succès à l'entité "+commSock.toString());
 			return;
-		/*}catch(InterruptedException e){
-			commSock.close();
-			return;*/
 		}catch(IOException ioe){
-			System.err.println("problème d'envoi d'historique à un client ");
-			ioe.printStackTrace(System.err);return ;
-		}finally{try {commSock.close();} catch(IOException e){}}
+			System.err.println("problème d'envoi d'historique IOE, arrêt");
+			ioe.printStackTrace(System.err);return ;}
 	}
 	
 	public void stopServer(){
@@ -227,6 +230,7 @@ public class Diffuseur{
 		if (!this.broadcastThreadIsWaiting){
 			this.msgHolder.notify();
 		}
+		System.out.println("le message "+ m.toString() +"a été ajouté avec succès.");
 		return;
 	}
 	
@@ -260,4 +264,3 @@ public class Diffuseur{
 		}catch(Exception e){}
 	}
 }
-

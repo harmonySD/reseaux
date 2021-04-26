@@ -6,7 +6,7 @@ public enum Prefixes {
 	,ACKM(4)
 	,LAST(8)
 	,OLDM(160)
-	,ENDM(1417) //FIXME quelle taille attendue ici ?
+	,ENDM(4) 
 	,REGI(1417) // FIXME quelle taille attendue ici ?
 	,REOK(4)
 	,RENO(4)

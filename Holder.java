@@ -44,6 +44,7 @@ public class Holder implements Iterator<String> {
 		return toret;// la taille de toret doit être 
 	}
 	
+	
 	public synchronized String[] retrieveHistory(int howmany){
 		if(1>howmany){return new String[0]; }
 	    String [] toret;
