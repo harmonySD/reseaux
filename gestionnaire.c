@@ -2,15 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <time.h>
-#include <errno.h>
-#include <pthread.h>
 #include <sys/select.h>
 #include <fcntl.h>
 #include <poll.h>
+
+#include <pthread.h>
+#include <time.h>
+#include <errno.h>
 
 #include "gestionnaire.h"
 #include "utilisateur.h"
@@ -110,37 +112,39 @@ void actionDiffuseur(int sock,char *newDiffu){
 
 void miseAJour(int sock,diffuseur *diffu){
     int drapeau = 1;
-    // struct timeval tv;
-    // tv.tv_sec=10;
-    // tv.tv_usec=0;
+    struct timeval tv;
+    tv.tv_sec=5;
+    tv.tv_usec=0;
     while(drapeau){
-        sleep(30);
+        sleep(6);
         char *mess="RUOK\r\n";
         send(sock,mess,strlen(mess),0);
-        // time_t debut = time(NULL) +10;
-        fcntl(sock,F_SETFL,O_NONBLOCK);
-        struct pollfd p[1];
-        p[0].fd=sock;
-        p[0].events=POLLIN;
         char imok[SIZE_FORME+2+1];
-        int ret=poll(p,1,10);
-        if(ret>0){
-            if (p[0].revents==POLLIN){
-                int rec=recv(p[0].fd,imok, SIZE_FORME+3,0);
-                if(rec>=0) imok[rec]='\0';
+
+        fd_set initial;
+        FD_SET(sock,&initial);
+        fd_set rdfs;
+        memcpy(&rdfs,&initial,sizeof(fd_set));
+        int ret=select(sock+1,&rdfs,NULL,NULL,&tv);
+        while(ret>0){
+            if(FD_ISSET(sock,&rdfs)){
+                int rec=recv(sock,imok,SIZE_FORME+3,0);
+                if(rec>=0){
+                    imok[rec]='\0';
+                }
+                ret--;
             }
         }
-
-        // while(time(NULL)<debut){
-        //     int recu=recv(sock,imok,(SIZE_FORME+2+1)*sizeof(char),0);
-        //     imok[recu]='\0';
-        //     printf("Recu %s",imok);
+        // int rec=recv(sock,imok,SIZE_FORME+3,0);
+        // if(rec>=0){
+        //     imok[rec]='\0';
         // }
         if(!strstr(imok,"IMOK")){
             enleverDiffu(diffu);
             close(sock);
             drapeau=0;
         }
+        strcpy(imok,"");
     }
 }
 
@@ -150,7 +154,7 @@ void enleverDiffu(diffuseur *diffu){
     int i=0;
     strcpy(id,annuaire[i].id);
     // trouver le diffuseur a enlever
-    while(!strcmp(id,diffu->id)){
+    while(strcmp(id,diffu->id)!=0){
         i++;
         strcpy(id,annuaire[i].id);
     }
@@ -230,3 +234,8 @@ int main(int argc, char**argv){
     return 0;
 
 }
+
+
+// jai un pb pour le RUOK, je narrive pas a faire en sorte que si le diffuseur ne repond au bout dun certain temps ca deconnecte
+// jai essayé avec poll comme dans le cours, mais cela marche en udp, or notre gestionnaire ne parle quen tcp, et jarrive pas a adapter pour que ca marche en tcp
+// donc si qql a une idee, je prends
