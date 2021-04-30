@@ -113,15 +113,17 @@ void actionDiffuseur(int sock,char *newDiffu){
 void miseAJour(int sock,diffuseur *diffu){
     int drapeau = 1;
     struct timeval tv;
-    tv.tv_sec=5;
+    tv.tv_sec=10;
     tv.tv_usec=0;
     while(drapeau){
-        sleep(6);
+        sleep(15);
         char *mess="RUOK\r\n";
         send(sock,mess,strlen(mess),0);
         char imok[SIZE_FORME+2+1];
 
+        fcntl(sock,F_SETFL,O_NONBLOCK);
         fd_set initial;
+        FD_ZERO(&initial);
         FD_SET(sock,&initial);
         fd_set rdfs;
         memcpy(&rdfs,&initial,sizeof(fd_set));
