@@ -190,7 +190,7 @@ void *sendMessage(void *coco) {
                 }
             }
         }else{
-            printf("erreur connexion Veuillez vous connecter plus tard\r\n");
+            printf("erreur connexion : Veuillez vous connecter plus tard (diffuseur non connecté)\r\n");
             break;
 
         }
