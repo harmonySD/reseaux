@@ -191,7 +191,7 @@ void *sendMessage(void *coco) {
             }
         }else{
             printf("erreur connexion %s", strerror(errno));
-            break;
+            printf("OOOOOO");
         }
     }
 }
