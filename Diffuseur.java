@@ -124,12 +124,13 @@ public class Diffuseur{
 		try (
 			PrintWriter out = new PrintWriter(so.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));
-		){
-			String verifier = in.readLine();
-			if(verifier != "" || in.ready()){
+		){	char [] charbuf = new char [2];
+			in.read(charbuf);
+			String verifier = new String(charbuf);
+			if(verifier != "\r\n" || in.ready()){
 					System.err.println("Une erreur est survenue avec "+so.getLocalSocketAddress().toString()+"l'en-tête était de taille incorrecte et étrange\n"
 							+"Suite de l'en-tête après RUOK: "+verifier
-							+"\ntaille attendue: "+Integer.valueOf(Prefixes.LAST.normalMessLength -Prefixes.headerSZ )
+							+"\ntaille attendue: "+Integer.valueOf(Prefixes.RUOK.normalMessLength -Prefixes.headerSZ )
 							+"\ntaille obtenue: "+Integer.valueOf(verifier.length())
 							+"\n il restait encore des choses à lire: "+Boolean.valueOf(in.ready()));
 					so.close();
