@@ -54,6 +54,8 @@ Choix a faire entre gestionnaire ou diffuseur.
 Pour envoyer un message taper `MESS`puis votre message !
 
 Pour demander l'historique taper `LAST`puis le nombre de messages voulu !
+
+Pour quitter un diffuseur taper `q`!
 ****
 
 ***
