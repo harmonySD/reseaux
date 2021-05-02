@@ -2,18 +2,18 @@ public enum Prefixes {
 	// liste uniformisée de tous les 
 	// préfixe admissible sur le réseau
 	 DIFF(161)
-	,MESS(154)
-	,ACKM(4)
-	,LAST(8)
-	,OLDM(160)
+	,MESS(156)
+	,ACKM(6)
+	,LAST(10)
+	,OLDM(161)
 	,ENDM(4) 
 	,REGI(1417) // FIXME quelle taille attendue ici ?
-	,REOK(4)
-	,RENO(4)
-	,RUOK(4)
-	,IMOK(4)
-	,LIST(4)
-	,LINB(7)
+	,REOK(6)
+	,RENO(6)
+	,RUOK(6)
+	,IMOK(6)
+	,LIST(6)
+	,LINB(9)
 	,ITEM(1417); // FIXME quelle taille attendue ici ?
 	Prefixes(int normallyWaitedMessagelength){ this.normalMessLength =normallyWaitedMessagelength;}
 	public static final int headerSZ = 4;
@@ -21,3 +21,4 @@ public enum Prefixes {
 	@Override 
 	public String toString(){ return this.name();}
 }
+

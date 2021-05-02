@@ -14,9 +14,9 @@ public class Message {
 		}else {this.id=userid;}
 		//stockage du message
 		if (message.length() != Message.DATASZ ){
-			if (message.length() > Message.DATASZ){this.data = message.substring(0,Message.DATASZ)+"\r\n";}
-			else{this.data = message+("#".repeat( Message.DATASZ - message.length() ))+"\r\n";}
-		}else {this.data=message+"\r\n";}
+			if (message.length() > Message.DATASZ){this.data = message.substring(0,Message.DATASZ);}
+			else{this.data = message+("#".repeat( Message.DATASZ - message.length() ));}
+		}else {this.data=message;}
 	}
 	
 	@Override 
@@ -27,3 +27,4 @@ public class Message {
 	public String getId(){return this.id;}
 	public String getText(){return this.data;}
 }
+

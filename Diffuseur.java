@@ -59,10 +59,10 @@ public class Diffuseur{
 				this.mltcstSA
 			);   
 		}catch(Exception e ){return;}
-		try{ // pour attrapper demande d'interruption
+		try(thesender;){ // pour attrapper demande d'interruption
 			while(true){
 				try{
-					String tosend=Prefixes.DIFF.toString()+" "+this.msgHolder.next();
+					String tosend=Prefixes.DIFF.toString()+" "+this.msgHolder.next()+"\r\n";
 					packtosend.setData(tosend.getBytes());
 					if (packtosend.getLength() != Prefixes.DIFF.normalMessLength ){
 						System.err.println("/!\\ Attention le message suivant de taille incorrecte à failli être envoyé"
@@ -93,20 +93,27 @@ public class Diffuseur{
 	private void sendMess(Socket so)throws IOException{
 
 		try(//envoie
-        PrintWriter out = new PrintWriter(so.getOutputStream());
-        //recoit
-		BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));)
+				PrintWriter out = new PrintWriter(so.getOutputStream());
+				//recoit
+				BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));
+		)
 		{
+			char [] buffer =  new char[Prefixes.MESS.normalMessLength - Prefixes.headerSZ];
 			//on recoit 
-			String recu=in.readLine();
-			System.out.println("recuuuu "+recu);
-			String id=recu.substring(0,8);
-			System.out.println("id "+id);
-			String mess=recu.substring(9, 140);
-			System.out.println("mess "+mess);
+			int  nbrecu= in.read(buffer);
+			if(nbrecu != Prefixes.MESS.normalMessLength - Prefixes.headerSZ || in.ready() ) {
+				System.err.println("Une erreur est survenue avec "+so.getLocalSocketAddress().toString()+"l'en-tête était de taille incorrecte;\n"
+						+"taille attendue: "+(Prefixes.MESS.normalMessLength - Prefixes.headerSZ )
+						+"taille obtenue: "+Integer.valueOf(nbrecu)
+						+"\n il restait encore des choses à lire: "+Boolean.valueOf(in.ready()));
+				so.close();
+				return;
+			}
+			String recu = new String(buffer);
+			String id=recu.substring(1,9);
+			String mess=recu.substring(9, 150);
 			this.addAMessage(new Message(id, mess));
-			out.print("ACKM\n\r");
-
+			out.print(Prefixes.ACKM +"\r\n");
 			out.flush();
 			so.close();
 
@@ -116,8 +123,18 @@ public class Diffuseur{
 	private void diffAlive(Socket so)throws IOException{
 		try (
 			PrintWriter out = new PrintWriter(so.getOutputStream());
+			BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));
 		){
-			out.print("IMOK\n\r");
+			String verifier = in.readLine();
+			if(verifier != "" || in.ready()){
+					System.err.println("Une erreur est survenue avec "+so.getLocalSocketAddress().toString()+"l'en-tête était de taille incorrecte et étrange\n"
+							+"Suite de l'en-tête après RUOK: "+verifier
+							+"\ntaille attendue: "+Integer.valueOf(Prefixes.LAST.normalMessLength -Prefixes.headerSZ )
+							+"\ntaille obtenue: "+Integer.valueOf(verifier.length())
+							+"\n il restait encore des choses à lire: "+Boolean.valueOf(in.ready()));
+					so.close();
+			}
+			out.print(Prefixes.IMOK+"\r\n");
 			out.flush();
 			so.close();
 		}finally {}
@@ -171,14 +188,22 @@ public class Diffuseur{
 			try{connSock.close();}catch(IOException e){};
 		}
 	}
-	private  void historygiver(Socket commSock){
+	
+private  void historygiver(Socket commSock){
 		if(null==commSock){throw new NullPointerException();}
 		if(commSock.isClosed()){return;}
 		try(BufferedReader bfred=new BufferedReader(new InputStreamReader(commSock.getInputStream()));commSock;){
-			String mssgContent = bfred.readLine();
+			char[] buffer = new char[Prefixes.LAST.normalMessLength - Prefixes.headerSZ];
+			bfred.read(buffer);
+			String mssgContent = new String(buffer);
 			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ  != mssgContent.length()
 					|| bfred.ready()){
-				commSock.close();return;
+				System.err.println("Une erreur est survenue avec "+commSock.getLocalSocketAddress().toString()+"le contenu aprè LAST était de taille incorrecte;\n"
+						+"taille attendue: "+Integer.valueOf(Prefixes.LAST.normalMessLength -Prefixes.headerSZ )
+						+"taille obtenue: "+Integer.valueOf(mssgContent.length())
+						+"\n il restait encore des choses à lire: "+Boolean.valueOf(bfred.ready()));
+				commSock.close();
+				return;
 			}
 			int howmanyasked;
 			try {
@@ -190,13 +215,13 @@ public class Diffuseur{
 				tosend = this.msgHolder.retrieveHistory(howmanyasked%Diffuseur.MAXHISTORY);
 			}
 			if (tosend.length == 0){
-				commSock.getOutputStream().write(Prefixes.ENDM.toString().getBytes());
+				commSock.getOutputStream().write((Prefixes.ENDM.toString()+"\r\n").getBytes());
 				commSock.close();
-				return;}
-				String entete = Prefixes.OLDM.toString();
+				return;
+				}
 				OutputStream wheretosend = commSock.getOutputStream();
  			for (String mess : tosend){
-				String finalpack= Prefixes.OLDM.toString()+" "+mess;
+				String finalpack= Prefixes.OLDM.toString()+" "+mess+"\r\n";
 				if(finalpack.getBytes().length != Prefixes.OLDM.normalMessLength){
 					System.err.println("/!\\ Attention le message suivant de taille incorrecte à failli être fourni comme historique à"
 						+commSock.toString()
@@ -209,7 +234,7 @@ public class Diffuseur{
 				}
 				wheretosend.write(finalpack.getBytes());	
 			}
-			wheretosend.write(Prefixes.ENDM.toString().getBytes());
+			wheretosend.write((Prefixes.ENDM.toString()+"\r\n").getBytes());
 			System.out.println("un historique a été fourni avec succès à l'entité "+commSock.toString());
 			return;
 		}catch(IOException ioe){
@@ -223,14 +248,16 @@ public class Diffuseur{
 		
 		}
 	public void addAMessage(Message m){
-		if (m== null){return;}
-		synchronized (this.msgHolder){
-		this.msgHolder.add(m);}
-		if (!this.broadcastThreadIsWaiting){
-			this.msgHolder.notify();
+		synchronized(this.msgHolder){
+			if (m== null){return;}
+			synchronized (this.msgHolder){
+			this.msgHolder.add(m);}
+			if (this.broadcastThreadIsWaiting){
+				this.msgHolder.notify();
+			}
+			System.out.println("le message "+ m.toString() +"a été ajouté avec succès.");
+			return;
 		}
-		System.out.println("le message "+ m.toString() +"a été ajouté avec succès.");
-		return;
 	}
 	
 	public synchronized int getBroadcastPort(){return this.mltcstSock.getLocalPort();}
@@ -243,12 +270,10 @@ public class Diffuseur{
 
 	public static void main (String [] args)throws Exception {
 		Diffuseur lediff = new Diffuseur(args[0], Integer.valueOf(args[1]), Integer.valueOf(args[2]),args[3]);
-		try{
-			Scanner sc = new Scanner(System.in);
+		try(Scanner sc = new Scanner(System.in);){
 			String temp;
 			for(int i =0;i<15;i++){
 				temp = sc.nextLine();
-				System.out.println("Ajout du message : "+temp);
 				lediff.addAMessage(new Message("M0ral3s",temp));	
 			}
 		}catch(NoSuchElementException ns){return;}
@@ -263,3 +288,4 @@ public class Diffuseur{
 		}catch(Exception e){}
 	}
 }
+

@@ -1,7 +1,6 @@
 import java.util.concurrent.*;
 import java.util.Iterator;
 import java.util.*;
-
 public class Holder implements Iterator<String> {
 
 
@@ -54,7 +53,7 @@ public class Holder implements Iterator<String> {
 			int nbret= howmany<this.nextMessageNumber-1?howmany:this.nextMessageNumber-1;
 	    	toret = new String[nbret];
 	        for (int i = nbret-1;i>-1;i--){
-				toret[nbret-i-1]=String.format("%03d",(this.nextMessageNumber-1-i))+" "+this.HistoryQueue[this.nextMessageNumber-1-i].toString();
+				toret[nbret-i-1]=String.format("%04d",(this.nextMessageNumber-1-i))+" "+this.HistoryQueue[this.nextMessageNumber-1-i].toString();
 			}
 	    }else{
 			// il faut reboucler sur la fin du tableau 
@@ -62,7 +61,7 @@ public class Holder implements Iterator<String> {
 			toret = new String[numtoget];
 
 			for (int i = numtoget;i>0;i--){
-				toret[numtoget-i]=String.format("%03d",((i-this.nextMessageNumber)%(HOLDSZ)))
+				toret[numtoget-i]=String.format("%04d",((i-this.nextMessageNumber)%(HOLDSZ)))
 				+" "
 				+this.HistoryQueue[(i-this.nextMessageNumber)%(HOLDSZ)].toString();
 			}
@@ -70,3 +69,4 @@ public class Holder implements Iterator<String> {
 	 return toret;   
 	}
 }
+
