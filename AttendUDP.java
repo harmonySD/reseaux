@@ -28,7 +28,7 @@ public class AttendUDP extends Thread{
             byte[]data = new byte[4 + 1 + 4 + 1 + idsz + 1 + datasz + 2];
             DatagramPacket paquet = new DatagramPacket(data, data.length);
             fenetre.setSize(500, 500);
-            fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            fenetre.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             label2.setEditable(false);
             label2.setBackground(Color.BLACK);
             label2.setForeground(Color.GREEN);

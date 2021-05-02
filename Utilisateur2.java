@@ -35,10 +35,11 @@ public class Utilisateur2{
                     System.out.println("*********UTILISATER2*********\r\n"+
                                         "Id : "+pseudo+"\r\n"+
                                         "******************************");
-                    AttendUDP audp = new AttendUDP(Integer.parseInt(port1),ip1);
                     AttendTCP atcp = new AttendTCP(Integer.parseInt(port2), ip2, pseudo);
-                    audp.start();
+                    AttendUDP audp = new AttendUDP(Integer.parseInt(port1),ip1);
+                    
                     atcp.start();
+                    audp.start();
                     while(atcp.isAlive()){
                     }
 

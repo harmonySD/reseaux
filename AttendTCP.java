@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -93,8 +94,12 @@ public class AttendTCP extends Thread{
                 }
                 
             }
-             catch (Exception e){
-            e.printStackTrace();
+            catch (ConnectException e){
+            System.out.println("erreur connexion : Veuillez vous connecter plus tard (diffuseur non connecté)");
+            arret=true;
+            }
+            catch(Exception e){
+                e.printStackTrace();
             }
         }
     }
