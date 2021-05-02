@@ -43,7 +43,6 @@ public class Utilisateur2{
                     }
 
                     audp.stops();
-                    System.out.println("grrr");
                 }
                 else if(choix.equals("gestionnaire")){
                     System.out.println("port :");

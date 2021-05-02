@@ -89,7 +89,7 @@ public class AttendTCP extends Thread{
                 }
                 else if(msg.equals("q")){
                     arret=true;
-                    System.out.println("ici");
+                    System.out.println("Au revoir 👋🏻");
                 }
                 
             }
