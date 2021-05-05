@@ -113,10 +113,10 @@ void actionDiffuseur(int sock,char *newDiffu){
 void miseAJour(int sock,diffuseur *diffu){
     int drapeau = 1;
     struct timeval tv;
-    tv.tv_sec=10;
+    tv.tv_sec=15;
     tv.tv_usec=0;
     while(drapeau){
-        sleep(15);
+        sleep(30);
         char *mess="RUOK\r\n";
         send(sock,mess,strlen(mess),0);
         char imok[SIZE_FORME+2+1];
@@ -134,6 +134,7 @@ void miseAJour(int sock,diffuseur *diffu){
                 if(rec>=0){
                     imok[rec]='\0';
                 }
+                printf("Message recu %s",imok);
                 ret--;
             }
         }
