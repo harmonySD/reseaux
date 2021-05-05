@@ -15,7 +15,7 @@ public class Diffuseur{
 	private ServerSocket rcvSock;
 	private InetSocketAddress mltcstSA;
 	private DatagramSocket mltcstSock;
-	private  long frqcy= 500;
+	private  long frqcy= 1000;
 	private Holder msgHolder  ; // ACCES CONCURRENT
 	private  Thread broadcastThread ;
 	private  boolean broadcastThreadIsWaiting = false; // le SEUL modifieur est broadCastLoop
