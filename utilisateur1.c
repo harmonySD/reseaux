@@ -252,11 +252,11 @@ int main(int argc, char**argv){
 
 
     diffuseur diffuseur=connection_gestionnaire(argv[1]);
-    // printf("port1 %s\n",diffuseur.port1);
-    // printf("ip1 %s\n",diffuseur.ip1);
-    // printf("ip2 %s\n",diffuseur.ip2);
-    // printf("port2 %s\n",diffuseur.port2);
-    // printf("id %s",ID);
+    printf("port1 %s\n",diffuseur.port1);
+    printf("ip1 %s\n",diffuseur.ip1);
+    printf("ip2 %s\n",diffuseur.ip2);
+    printf("port2 %s\n",diffuseur.port2);
+    printf("id %s",ID);
     printf("**********UTILISATEUR**********\n");
     printf("Id: %s\n",ID);
     printf("*******************************\n");
