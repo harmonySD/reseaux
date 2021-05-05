@@ -259,6 +259,26 @@ private  void historygiver(Socket commSock){
 		}
 	}
 	
+	public void synchronized ToGestionnaire( InetAdress toRegister,int port){
+		try (Socket sock = new Socket (InetAdress,port);
+			OutputStream sendStream = sock.getOutputStream();
+			InputStream receiveStream =sock.getInputStream();	
+		){
+			System.out.println("Connexion établie avec un gestionnaire :"+sock.getInetAdress.toString()+" tentative d'enregistrement...");
+			String tosend = Prefixes.REGI.toString()+" "+this.id+" "+this.getLocalAddress()+" "+Integer.valueOf(this.getReceivePort)+" "+this.getMulticastSock.getInetAdress.toString()+" "+Integer.valueOf(this.getBroadcastPort)+"\r\n";//REGI␣id␣ip1␣port1␣ip2␣port2 
+			if(tosend.getBytes().length != Prefixes.REGI.normalMessLength){
+				System.err.println("Tentative d'envoi d'un message d'enregistrement erroné à "
+				+sock.getInetAdress.toString()
+				+"\nle message :'"+tosend+"' \nfermeture de la connexion.");
+				return;
+			}
+		}catch(IOException e){System.err.println("Exception IOE lors de l'enregistrement à un gestionnaire, arrêt");
+		}catch(UnknownHostException e){ System.err.println("Exception 'Hôte Inconnu' lors de l'enregistrement à un gestionnaire, arrêt");
+		}catch(Exception e){System.err.println("Exception '"+e.toString()+ "' lors de l'enregistrement à un gestionnaire, arrêt");
+		}	
+		
+	}
+	
 	public synchronized int getBroadcastPort(){return this.mltcstSock.getLocalPort();}
 	public synchronized int getReceivePort(){return this.rcvPrt;}
 	public synchronized long getFrequency(){return this.frqcy;}
