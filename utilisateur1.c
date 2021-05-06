@@ -8,14 +8,14 @@ typedef struct{
 }connex;
 
 char *verif_lenght(char *str, int size){
-    char *final_str = str; 
+    char *final_str = str;
     int size_str = strlen(str);
     //if size of str is not equal to size(aka size wanted)
     if(size_str < size){
-        //add # 
+        //add #
         for(int i = size_str-1; i < size-1; i++){
            strcat(final_str,"#");
-        } 
+        }
     }
     //if size of str bigger than size
     else if (size_str > size){
@@ -43,8 +43,8 @@ char *verif_lenght_nb(char *str, int size){
         strcat(nb2, nb);
         nb = nb2;
     }
-    //if size of nb bigger than size 
-    //we supposed its the max nb of messages 
+    //if size of nb bigger than size
+    //we supposed its the max nb of messages
     else if(size_nb > size){
         nb="999";
     }
@@ -52,12 +52,12 @@ char *verif_lenght_nb(char *str, int size){
 }
 
 
-diffuseur connection_gestionnaire(char *argv){ 
+diffuseur connection_gestionnaire(char *argv){
     int p = atoi(argv);
     struct sockaddr_in adress_sock;
     adress_sock.sin_family = AF_INET;
     adress_sock.sin_port = htons(p);
-    inet_aton("127.0.0.1", &adress_sock.sin_addr);
+    inet_aton("192.168.70.104", &adress_sock.sin_addr);
     int descr = socket(PF_INET, SOCK_STREAM, 0);
     int r = connect(descr, (struct sockaddr *)&adress_sock, sizeof(struct sockaddr_in));
     if(r != 1){
@@ -72,46 +72,51 @@ diffuseur connection_gestionnaire(char *argv){
         //get num_diff
         char *nbstr = strtok(rec, "LINB ");
         int nb = atoi(nbstr);
-        diffuseur tab[nb];
-        int i = 0;
-        for(i = 0; i < nb; i++){
-            //fill the array of diffuseur 
-            char rec[SM + ESP + SIZE_ID + ESP + SIZE_IP + ESP + SIZE_PORT + ESP+ SIZE_IP 
-                    + ESP + SIZE_PORT + FIN + BSLASH];
-            int t_recu = recv(descr, rec, SM + ESP + SIZE_ID + ESP + SIZE_IP + ESP + 
-                                SIZE_PORT + ESP + SIZE_IP + ESP + SIZE_PORT + FIN, 0);
-            rec[t_recu] = '\0';
-            char * tok;
-            int j = 0;
-            tok = strtok (rec,"ITEM ");
-            while (tok != NULL)
-            {
-                if(j == 0){
-                    memcpy(tab[i].id,tok,SIZE_ID+1);
-                    tok = strtok (NULL, " \r\n");
-                }else if(j == 1){
-                    memcpy(tab[i].ip1,tok,SIZE_IP+1);
-                    tok = strtok (NULL, " \r\n");
-                }else if(j == 2){
-                    memcpy(tab[i].port1,tok,SIZE_PORT+1);
-                    tok = strtok (NULL, " \r\n");
-                }else if(j == 3){
-                    memcpy(tab[i].ip2,tok,SIZE_IP+1);
-                    tok = strtok (NULL, " \r\n");
-                }else if(j == 4){
-                    memcpy(tab[i].port2,tok,SIZE_PORT+1);
-                    tok = strtok (NULL, " \r\n");
-                }
-                j++;  
-            }
-        }
+        if(nb ==0){
+          printf("aucun diffuseur enregistré !\n");
+          exit(EXIT_SUCCESS);
+        }else{
+          diffuseur tab[nb];
+          int i = 0;
+          for(i = 0; i < nb; i++){
+              //fill the array of diffuseur
+              char rec[SM + ESP + SIZE_ID + ESP + SIZE_IP + ESP + SIZE_PORT + ESP+ SIZE_IP
+                      + ESP + SIZE_PORT + FIN + BSLASH];
+              int t_recu = recv(descr, rec, SM + ESP + SIZE_ID + ESP + SIZE_IP + ESP +
+                                  SIZE_PORT + ESP + SIZE_IP + ESP + SIZE_PORT + FIN, 0);
+              rec[t_recu] = '\0';
+              char * tok;
+              int j = 0;
+              tok = strtok (rec,"ITEM ");
+              while (tok != NULL)
+              {
+                  if(j == 0){
+                      memcpy(tab[i].id,tok,SIZE_ID+1);
+                      tok = strtok (NULL, " \r\n");
+                  }else if(j == 1){
+                      memcpy(tab[i].ip1,tok,SIZE_IP+1);
+                      tok = strtok (NULL, " \r\n");
+                  }else if(j == 2){
+                      memcpy(tab[i].port1,tok,SIZE_PORT+1);
+                      tok = strtok (NULL, " \r\n");
+                  }else if(j == 3){
+                      memcpy(tab[i].ip2,tok,SIZE_IP+1);
+                      tok = strtok (NULL, " \r\n");
+                  }else if(j == 4){
+                      memcpy(tab[i].port2,tok,SIZE_PORT+1);
+                      tok = strtok (NULL, " \r\n");
+                  }
+                  j++;
+              }
+          }
         srand(time(NULL));
         int pos=rand()%i;
         diffuseur choix_diffuseur;
         memmove(&choix_diffuseur,&tab[pos],sizeof(diffuseur));
-        return choix_diffuseur;        
-    } 
-    //no diffuseur 
+        return choix_diffuseur;
+      }
+    }
+    //no diffuseur
     diffuseur choix_diffuseur;
     strncpy(choix_diffuseur.id,"",SIZE_ID);
     strncpy(choix_diffuseur.ip1,"",SIZE_IP);
@@ -126,7 +131,7 @@ void *sendMessage(void *coco) {
     connex *foo= (connex*)coco;
     struct sockaddr_in adress_sock2 = foo->adress_sock;
     while (1) {
-        
+
         int descr = socket(PF_INET, SOCK_STREAM, 0);
         int r2 = connect(descr, (struct sockaddr *)&adress_sock2,
                 sizeof(struct sockaddr_in));
@@ -141,13 +146,13 @@ void *sendMessage(void *coco) {
                 fflush(stdin);
                 char *m = verif_lenght(messAenv, SIZE_MESS);
                 char mess[SM + ESP + SIZE_MESS + ESP + SIZE_ID + FIN];
-                strcpy(mess, message); 
+                strcpy(mess, message);
                 strcat(mess, " ");
                 strcat(mess, ID);
                 strcat(mess, " ");
                 strcat(mess, m);
                 strcat(mess, "\r\n");
-                int test_send = send(descr, mess, SM + ESP + SIZE_ID + ESP 
+                int test_send = send(descr, mess, SM + ESP + SIZE_ID + ESP
                                 + SIZE_MESS + FIN, 0);
                 if(test_send < 0){
                     printf("test_send =%d\n", test_send);
@@ -159,7 +164,7 @@ void *sendMessage(void *coco) {
                 recu[taille_rec] = '\0';
                 //printf("recu %s\n",recu); //Verification ACKM send
                 if(strstr(recu,"ACKM") == NULL){
-                    printf("Message non recu par le diffuseur");  
+                    printf("Message non recu par le diffuseur");
                 }
             }else if(strstr(message, "LAST")){
                 char nb[SM];
@@ -177,7 +182,7 @@ void *sendMessage(void *coco) {
                 strcat(mess, m);
                 strcat(mess, "\r\n");
                 send(descr, mess, SM + ESP + NBMESS + FIN, 0);
-                char recu[SM + ESP + NUMMESS + ESP + SIZE_ID + ESP + SIZE_MESS 
+                char recu[SM + ESP + NUMMESS + ESP + SIZE_ID + ESP + SIZE_MESS
                         + FIN + BSLASH];
                 int taille_rec = recv(descr, recu, SM + ESP + NUMMESS + ESP + SIZE_ID
                         + ESP + SIZE_MESS + FIN, 0);
@@ -204,17 +209,17 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
     int r = setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &ok, sizeof(ok));
     struct sockaddr_in address_sock;
     address_sock.sin_family = AF_INET;
-    address_sock.sin_port = htons(atoi(port1));//3434 
+    address_sock.sin_port = htons(atoi(port1));//3434
     address_sock.sin_addr.s_addr = htonl(INADDR_ANY);
     r = bind(sock, (struct sockaddr *)&address_sock, sizeof(struct sockaddr_in));
-    
+
     struct ip_mreq mreq;
     mreq.imr_multiaddr.s_addr  = inet_addr(ip1);//"225.1.2.4"
     mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 
     r = setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
-   
-    if(r == 0){    
+
+    if(r == 0){
         struct sockaddr_in adress_sock2;
         adress_sock2.sin_family = AF_INET;
         adress_sock2.sin_port = htons(atoi(port2));//5757
@@ -224,16 +229,16 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
         coco.adress_sock=adress_sock2;
         pthread_t thread;
         pthread_create(&thread, NULL, sendMessage, &coco);
-       
+
         while(1){
             int fd = open(tty,O_RDWR);
-            char mess_recu[SM + ESP + NUMMESS + ESP + SIZE_ID + ESP 
-                    + SIZE_MESS + FIN + BSLASH]; 
-            int rec = recv(sock, mess_recu, SM + ESP + NUMMESS + ESP 
+            char mess_recu[SM + ESP + NUMMESS + ESP + SIZE_ID + ESP
+                    + SIZE_MESS + FIN + BSLASH];
+            int rec = recv(sock, mess_recu, SM + ESP + NUMMESS + ESP
                     + SIZE_ID + ESP + SIZE_MESS + FIN, 0);
             mess_recu[rec] = '\0';
             //printf("Message recu :%s\n", mess_recu);
-            write(fd,mess_recu,SM + ESP + NUMMESS + ESP + SIZE_ID + ESP 
+            write(fd,mess_recu,SM + ESP + NUMMESS + ESP + SIZE_ID + ESP
                     + SIZE_MESS + FIN + BSLASH);
         }
     }
@@ -247,8 +252,8 @@ int main(int argc, char**argv){
     }
     TTY = argv[2];
     ID = verif_lenght(argv[3], SIZE_ID);
-    //connection gestionnaire en mode TCP qui rempli une struture pour sauvegarde 
-    //le port et l'adress ip choisit 
+    //connection gestionnaire en mode TCP qui rempli une struture pour sauvegarde
+    //le port et l'adress ip choisit
 
 
     diffuseur diffuseur=connection_gestionnaire(argv[1]);
@@ -260,8 +265,8 @@ int main(int argc, char**argv){
     printf("**********UTILISATEUR**********\n");
     printf("Id: %s\n",ID);
     printf("*******************************\n");
-    //connection_diffuseur("5656","225.10.20.30","5454","127.0.0.1",ID,TTY);//port et  addresse issue de la structure  PAS SURE 
-    connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID,TTY);
+    //connection_diffuseur("5656","225.10.20.30","5454","127.0.0.1",ID,TTY);//port et  addresse issue de la structure  PAS SURE
+    //connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID,TTY);
 
 
 
@@ -269,4 +274,3 @@ int main(int argc, char**argv){
 
 
 }
-
