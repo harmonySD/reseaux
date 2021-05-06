@@ -60,8 +60,8 @@ char *verif_lenght_nb(char *str, int size){
 // donne la liste des diffuseurs au client
 void recvClient(int sock){
     int tailleMessDiffu=SIZE_FORME+1+SIZE_ID+1+
-                        SIZE_IP+1+SIZE_PORT+1+SIZE_IP+1+SIZE_PORT+2;
-    char messNum[SIZE_FORME+1+2+2+1];
+                        SIZE_IP+1+SIZE_PORT+1+SIZE_IP+1+SIZE_PORT+FIN;
+    char messNum[SIZE_FORME+1+NUMDIFF+FIN+1];
     char numDiff[3];
     sprintf(numDiff,"%i",nbDiffu);
     sprintf(numDiff,"%s",verif_lenght_nb(numDiff,2));
@@ -119,7 +119,7 @@ void miseAJour(int sock,diffuseur *diffu){
         sleep(30);
         char *mess="RUOK\r\n";
         send(sock,mess,strlen(mess),0);
-        char imok[SIZE_FORME+2+1];
+        char imok[SIZE_FORME+FIN+1];
 
         fcntl(sock,F_SETFL,O_NONBLOCK);
         fd_set initial;
@@ -138,11 +138,7 @@ void miseAJour(int sock,diffuseur *diffu){
                 ret--;
             }
         }
-        // int rec=recv(sock,imok,SIZE_FORME+3,0);
-        // if(rec>=0){
-        //     imok[rec]='\0';
-        // }
-        if(!strstr(imok,"IMOK")){
+        if(strcmp(imok,"IMOK\r\n")!=0){
             enleverDiffu(diffu);
             close(sock);
             drapeau=0;
@@ -172,21 +168,66 @@ void enleverDiffu(diffuseur *diffu){
     pthread_mutex_unlock(&verrou);
 }
 
+void mallDiffu(int sock, char *mess){
+    for(int i=0;i<nbDiffu;i++){
+        struct sockaddr_in adress_sock;
+        adress_sock.sin_family = AF_INET;
+        int p = atoi(annuaire[i].port2);
+        adress_sock.sin_port = htons(p);
+        inet_aton(annuaire[i].ip2,&adress_sock.sin_addr);
+
+        int sockD=socket(PF_INET,SOCK_STREAM,0);
+        int r=connect(sockD,(struct sockaddr *)&adress_sock,
+                sizeof(struct sockaddr_in));
+        if(r!=-1){
+            send(sockD,mess,strlen(mess),0);
+
+            char rall[SIZE_FORME+1+FIN];
+            int size_rec=recv(sockD,rall,sizeof(char)*(SIZE_FORME+1+FIN),0);
+            rall[size_rec]='\0';
+            printf("Message recu %s",rall);
+            close(sockD);  
+        }
+    }
+    close(sock);
+
+}
+
 // en fonction du message recu appelle la bonne fonction
 void *choixDiscussion(void *arg){
     int sock=*((int *)arg);
-    int tailleMessDiffu=SIZE_FORME+1+SIZE_IP+1+
-                        SIZE_IP+1+SIZE_PORT+1+SIZE_IP+1+SIZE_PORT+2;
+    int tailleMessDiffu=SIZE_FORME + 1 + SIZE_IP + 1 + 
+            SIZE_MESS + FIN;
     char newDiffu[tailleMessDiffu+1];
     int recu=recv(sock,newDiffu,tailleMessDiffu*sizeof(char),0);
     newDiffu[recu]='\0';
     printf("Message recu %s",newDiffu);
+
+    // if(newDiffu[0]=='R' && newDiffu[1]=='E' && 
+    //     newDiffu[2]=='G' && newDiffu[2]=='I' &&
+    //     newDiffu[recu-1]=='\n' &&
+    //     newDiffu[recu-2]=='\r'){
+    //     actionDiffuseur(sock,newDiffu);
+    // }
     if(strstr(newDiffu,"REGI")){
         actionDiffuseur(sock,newDiffu);
     }
     else if(strstr(newDiffu,"LIST")){
         recvClient(sock);
     }
+    // else if(strcmp(newDiffu,"LIST\r\n")==0){
+    //     recvClient(sock);
+    // }
+    else if(strstr(newDiffu,"MALL")){
+        mallDiffu(sock,newDiffu);
+    }
+
+    // else if(newDiffu[0]=='M' && newDiffu[1]=='A' && 
+    //     newDiffu[2]=='L' && newDiffu[2]=='L' &&
+    //     newDiffu[recu-1]=='\n' &&
+    //     newDiffu[recu-2]=='\r'){
+    //     mallDiffu(sock,newDiffu);
+    // }
     else {
         close(sock);
     }
@@ -212,8 +253,8 @@ void choix(int p){
                 int *sock2=(int *)malloc(sizeof(int));
                 *sock2=accept(sock1,(struct sockaddr *)&caller,&size);
                 if(*sock2>=0){
-                    pthread_t th1;
-                    int r1=pthread_create(&th1,NULL,choixDiscussion,sock2);
+                    pthread_t th;
+                    int r1=pthread_create(&th,NULL,choixDiscussion,sock2);
                     if (r1!=0){
                         perror("Erreur thread utilisateur\n");
                         exit(0);
@@ -235,7 +276,6 @@ int main(int argc, char**argv){
     int p=atoi(argv[1]);
     choix(p);
     return 0;
-
 }
 
 

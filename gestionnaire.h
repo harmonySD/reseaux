@@ -26,6 +26,7 @@ extern void recvClient(int sock);
 extern void actionDiffuseur(int sock,char *newDiffu);
 extern void miseAJour(int sock,diffuseur *diffu);
 extern void enleverDiffu(diffuseur *diffu);
+extern void mallDiffu(int sock, char *mess);
 extern void *choixDiscussion(void *arg);
 extern void choix(int p);
 
