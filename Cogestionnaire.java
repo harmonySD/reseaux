@@ -9,11 +9,11 @@ public class Cogestionnaire extends Thread{
 
     public Cogestionnaire(int p){
         port=p;
-     
+
     }
 
     public void run(){
-        try(Socket cs = new Socket("127.0.0.1",port);
+        try(Socket cs = new Socket("192.168.70.104",port);
         //envoie
         PrintWriter out = new PrintWriter(cs.getOutputStream());
         //recoit
