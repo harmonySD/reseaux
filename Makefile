@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -g
+CFLAGS=-Wall -pthread
 LDLIBS=-lm
 JC=javac
 .SUFFIXES: .java .class
@@ -25,10 +25,8 @@ utilisateur.o: utilisateur1.c utilisateur.h
 	
 
 gestio: gestionnaire.o 
-	gcc -pthread -o gestio gestionnaire.o
+	$(CC) $(CFLAGS) gestionnaire.o -o gestio
 
-gestionnaire.o: gestionnaire.c gestionnaire.h utilisateur.h
-	gcc -o gestionnaire.o -c gestionnaire.c
 
 Utilisateur2: $(CLASSES:.java=.class)
 
