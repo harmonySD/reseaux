@@ -1,23 +1,34 @@
 CC=gcc
 CFLAGS=-Wall -pthread
 LDLIBS=-lm
+JC=javac
+.SUFFIXES: .java .class
+.java.class: 
+	$(JC) $*.java
 
-ALL=gestio client
+CLASSES =\
+		Utilisateur2.java \
+		AttendUDP.java \
+		AttendTCP.java \
+		Cogestionnaire.java
+
+ALL=gestio client Utilisateur2
 
 all: $(ALL)
 
-utilisateur1.o: utilisateur1.c utilisateur.h
-	$(CC) $(CFLAGS) -c utilisateur1.c
 
-gestionnaire.o: gestionnaire.c gestionnaire.h
-	$(CC) $(CFLAGS) -c gestionnaire.c
+client:utilisateur.o 
+	gcc -pthread -o client utilisateur.o
 
-client:utilisateur1.o 
-	$(CC) $(CFLAGS) utilisateur1.o -o client
+utilisateur.o: utilisateur1.c utilisateur.h
+	gcc -o utilisateur.o -c utilisateur1.c
+	
 
 gestio: gestionnaire.o 
 	$(CC) $(CFLAGS) gestionnaire.o -o gestio
 
+
+Utilisateur2: $(CLASSES:.java=.class)
 
 
 cleanall :
@@ -25,3 +36,4 @@ cleanall :
 
 clean:
 	rm -rf *~ $(ALL)
+	rm -rf *.class
