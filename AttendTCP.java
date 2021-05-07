@@ -59,7 +59,6 @@ public class AttendTCP extends Thread{
                     System.out.println("Entrer votre message : ");
                     msg = sc.nextLine();
                     msg = completeIfNeeded(msg, datasz);
-                    System.out.println("TAILLE "+msg.length());
                     menv = "MESS " + pseudo + " " + msg + "\r\n";
                     out.print(menv);
                     out.flush();

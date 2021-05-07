@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
+
 public class Utilisateur2{
     public static String completeIfNeeded(String src, int wantedsz){
         int manytofill = wantedsz - src.length();
@@ -40,16 +41,18 @@ public class Utilisateur2{
                     
                     atcp.start();
                     audp.start();
-                    while(atcp.isAlive()){
-                    }
+                    while(atcp.isAlive()){}
 
                     audp.stops();
                 }
                 else if(choix.equals("gestionnaire")){
-                    System.out.println("port :");
-                    choix = sc.nextLine();
-                    Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(choix));
+                    System.out.println("port : ");
+                    String port = sc.nextLine();
+                    System.out.println("addresse : ");
+                    String add = sc.nextLine();
+                    Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(port),add);
                     cg.start();
+                    Thread.sleep(500);
                 }
             }
         } catch (Exception e){
