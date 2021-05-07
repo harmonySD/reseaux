@@ -52,12 +52,12 @@ char *verif_lenght_nb(char *str, int size){
 }
 
 
-diffuseur connection_gestionnaire(char *argv){
+diffuseur connection_gestionnaire(char *argv, char *add){
     int p = atoi(argv);
     struct sockaddr_in adress_sock;
     adress_sock.sin_family = AF_INET;
     adress_sock.sin_port = htons(p);
-    inet_aton("192.168.70.104", &adress_sock.sin_addr);
+    inet_aton(add, &adress_sock.sin_addr);
     int descr = socket(PF_INET, SOCK_STREAM, 0);
     int r = connect(descr, (struct sockaddr *)&adress_sock, sizeof(struct sockaddr_in));
     if(r != 1){
@@ -73,7 +73,7 @@ diffuseur connection_gestionnaire(char *argv){
         char *nbstr = strtok(rec, "LINB ");
         int nb = atoi(nbstr);
         if(nb ==0){
-          printf("aucun diffuseur enregistré !\n");
+          printf("Aucun diffuseur enregistré !\n");
           exit(EXIT_SUCCESS);
         }else{
           diffuseur tab[nb];
@@ -141,7 +141,7 @@ void *sendMessage(void *coco) {
             fflush(stdin);
             if(strstr(message, "MESS")){
                 char messAenv[SIZE_MESS];
-                printf("%s", "entree votre message d'au plus 140 characteres: ");
+                printf("%s", "Entree votre message d'au plus 140 characteres: ");
                 scanf("%[^\n]%*c", messAenv);
                 fflush(stdin);
                 char *m = verif_lenght(messAenv, SIZE_MESS);
@@ -155,7 +155,6 @@ void *sendMessage(void *coco) {
                 int test_send = send(descr, mess, SM + ESP + SIZE_ID + ESP
                                 + SIZE_MESS + FIN, 0);
                 if(test_send < 0){
-                    printf("test_send =%d\n", test_send);
                     printf("%s\n", strerror(errno));
                 }
                 //printf("mess :%s\n", mess);
@@ -168,14 +167,13 @@ void *sendMessage(void *coco) {
                 }
             }else if(strstr(message, "LAST")){
                 char nb[SM];
-                printf("%s", "afficher combien de message de l'historique : ");
+                printf("%s", "Afficher combien de message de l'historique : ");
                 scanf("%[^\n]%*c", nb);
                 fflush(stdin);
                 if(atoi(nb) == 0){
                     strcpy(nb,"0");
                 }
                 char *m = verif_lenght_nb(nb, 3);
-                //printf("m %s", m);
                 char mess[SM + ESP + NBMESS + FIN];
                 strcpy(mess, message);
                 strcat(mess, " ");
@@ -188,18 +186,19 @@ void *sendMessage(void *coco) {
                         + ESP + SIZE_MESS + FIN, 0);
                 recu[taille_rec] = '\0';
                 while (strstr(recu,"ENDM") == NULL){
-                    printf("message de l'historique :%s\n", recu);
+                    printf("Message de l'historique :%s\n", recu);
                     taille_rec = recv(descr, recu, SM + ESP + NUMMESS + ESP + SIZE_ID
                             + ESP + SIZE_MESS + FIN, 0);
                     recu[taille_rec] = '\0';
                 }
             }
         }else{
-            printf("erreur connexion : Veuillez vous connecter plus tard (diffuseur non connecté)\r\n");
+            printf("Erreur connexion : Veuillez vous connecter plus tard (diffuseur non connecté)\r\n");
             break;
 
         }
     }
+    return NULL;
 }
 
 
@@ -209,12 +208,12 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
     int r = setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &ok, sizeof(ok));
     struct sockaddr_in address_sock;
     address_sock.sin_family = AF_INET;
-    address_sock.sin_port = htons(atoi(port1));//3434
+    address_sock.sin_port = htons(atoi(port1));
     address_sock.sin_addr.s_addr = htonl(INADDR_ANY);
     r = bind(sock, (struct sockaddr *)&address_sock, sizeof(struct sockaddr_in));
 
     struct ip_mreq mreq;
-    mreq.imr_multiaddr.s_addr  = inet_addr(ip1);//"225.1.2.4"
+    mreq.imr_multiaddr.s_addr  = inet_addr(ip1);
     mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 
     r = setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
@@ -222,8 +221,8 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
     if(r == 0){
         struct sockaddr_in adress_sock2;
         adress_sock2.sin_family = AF_INET;
-        adress_sock2.sin_port = htons(atoi(port2));//5757
-        inet_aton(ip2, &adress_sock2.sin_addr);//"127.0.0.1"
+        adress_sock2.sin_port = htons(atoi(port2));
+        inet_aton(ip2, &adress_sock2.sin_addr);
 
         connex coco;
         coco.adress_sock=adress_sock2;
@@ -237,7 +236,7 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
             int rec = recv(sock, mess_recu, SM + ESP + NUMMESS + ESP
                     + SIZE_ID + ESP + SIZE_MESS + FIN, 0);
             mess_recu[rec] = '\0';
-            //printf("Message recu :%s\n", mess_recu);
+            //print messages from the diffuseur to another terminal
             write(fd,mess_recu,SM + ESP + NUMMESS + ESP + SIZE_ID + ESP
                     + SIZE_MESS + FIN + BSLASH);
         }
@@ -246,17 +245,15 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
 
 
 int main(int argc, char**argv){
-    if(argc != 4){
-        printf("Erreur il faut fournir un numero de port et le tty d'un terminale et le pseudo ! ");
+    if(argc != 5){
+        printf("Erreur il faut fournir le numero de port et l'adresse d'un gestionnaire ainsi que le tty d'un terminale et un pseudo ! ");
         return 0;
     }
-    TTY = argv[2];
-    ID = verif_lenght(argv[3], SIZE_ID);
-    //connection gestionnaire en mode TCP qui rempli une struture pour sauvegarde
-    //le port et l'adress ip choisit
-
-
-    //diffuseur diffuseur=connection_gestionnaire(argv[1]);
+    TTY = argv[3];
+    ID = verif_lenght(argv[4], SIZE_ID);
+    //connection to the gestionnaire (TCP mode) which fill a structure with informations
+    //about the chosen diffuseur  (randomly)
+    diffuseur diffuseur=connection_gestionnaire(argv[1],argv[2]);
   //  printf("port1 %s\n",diffuseur.port1);
   //  printf("ip1 %s\n",diffuseur.ip1);
   //  printf("ip2 %s\n",diffuseur.ip2);
@@ -265,8 +262,7 @@ int main(int argc, char**argv){
     printf("**********UTILISATEUR**********\n");
     printf("Id: %s\n",ID);
     printf("*******************************\n");
-    connection_diffuseur("5678","225.10.20.30","1234","192.168.70.104",ID,TTY);//port et  addresse issue de la structure  PAS SURE
-    //connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID,TTY);
+    connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID,TTY);
 
 
 
