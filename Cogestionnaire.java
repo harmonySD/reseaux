@@ -67,8 +67,9 @@ public class Cogestionnaire extends Thread{
                 out.print(menv2+"\r\n");
                 out.flush();
                 //recu confiration ?
-                // String mess = in.readLine();
-                // System.out.println(("recu "+mess));
+                String mess = in.readLine();
+                System.out.println(("recu "+mess));
+                if(mess.equals("RALL")){System.out.println("Message bien recu par le gestionnaire");}
 
 
             }
