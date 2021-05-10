@@ -168,7 +168,12 @@ void enleverDiffu(diffuseur *diffu){
     pthread_mutex_unlock(&verrou);
 }
 
+// envoie de mess a tous les diffuseurs de annuaire
 void mallDiffu(int sock, char *mess){
+    char *messR="RALL\r\n";
+    send(sock,messR,strlen(messR),0);
+    close(sock);
+
     for(int i=0;i<nbDiffu;i++){
         struct sockaddr_in adress_sock;
         adress_sock.sin_family = AF_INET;
@@ -186,17 +191,15 @@ void mallDiffu(int sock, char *mess){
             int size_rec=recv(sockD,rall,sizeof(char)*(SIZE_FORME+1+FIN),0);
             rall[size_rec]='\0';
             printf("Message recu %s",rall);
-            close(sockD);  
+            // close(sockD);  
         }
     }
-    close(sock);
-
 }
 
 // en fonction du message recu appelle la bonne fonction
 void *choixDiscussion(void *arg){
     int sock=*((int *)arg);
-    int tailleMessDiffu=SIZE_FORME + 1 + SIZE_IP + 1 + 
+    int tailleMessDiffu=SIZE_FORME + 1 + SIZE_ID + 1 + 
             SIZE_MESS + FIN;
     char newDiffu[tailleMessDiffu+1];
     int recu=recv(sock,newDiffu,tailleMessDiffu*sizeof(char),0);

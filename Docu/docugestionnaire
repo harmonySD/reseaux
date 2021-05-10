@@ -65,4 +65,6 @@ ___fonctions
 
 * enleverDiffu(diffuseur *diffu) : parcours l'annuaire pour trouver le diffuseur a enlever (sous-entend que id est unique), puis lenleve en decalant les diffuseurs qui suivent dun cran, pour effacer le diffuseur donne en argument.
 
+* void mallDiffu(int sock, char *mess) : repond au client (sock) qu'il a bien recu, puis se connecte en c tant que client à tous les diffuseurs enregistrés dans annuaire et leur envoie mess venant du client pour qu'ils le publient.
+
 
