@@ -1,7 +1,7 @@
 import java.net.*;
 import java.util.*;
-import java.io.IOException;
 import java.io.*;
+import java.net.InetAddress;
 
 
 /**
@@ -14,9 +14,8 @@ public class Diffuseur{
 	private  int rcvPrt;
 	private ServerSocket rcvSock;
 	private InetSocketAddress mltcstSA;
-	private DatagramSocket mltcstSock;
-	private  long frqcy= 1000;
-	private Holder msgHolder  ; // ACCES CONCURRENT
+	private  long frqcy= 2500;
+	private Holder msgHolder  ;
 	private  Thread broadcastThread ;
 	private  boolean broadcastThreadIsWaiting = false; // le SEUL modifieur est broadCastLoop
 	private  Thread receiveThread;
@@ -29,10 +28,8 @@ public class Diffuseur{
 		if(recvPort <0 || multiCastPort <0  || recvPort > 65535|| multiCastPort > 65535 ){
 			throw new IllegalArgumentException("Port  incorrect");
 		}
-		this.id = MultiCasterID;
+		this.id = MultiCasterID; // pas de sécurité max 8 caractères
 		this.rcvPrt = recvPort ;
-		this.mltcstSock = new DatagramSocket(); // peut lancer SocketException
-		this.mltcstSock.setReuseAddress(true); // pour se faciliter la vie par la suite 
 		this.mltcstSA = new InetSocketAddress(multiCastAddress,multiCastPort);
 		this.msgHolder = new Holder();
 		
@@ -48,7 +45,7 @@ public class Diffuseur{
 		this.startBroadcast();
 	}
 	
-	 private synchronized void  broadcastLoop (){
+	 private void  broadcastLoop (){
 		DatagramSocket thesender;
 		DatagramPacket packtosend;
 		try{
@@ -62,7 +59,10 @@ public class Diffuseur{
 		try(thesender;){ // pour attrapper demande d'interruption
 			while(true){
 				try{
-					String tosend=Prefixes.DIFF.toString()+" "+this.msgHolder.next()+"\r\n";
+					String tosend;
+					synchronized(this.msgHolder){
+					 tosend=Prefixes.DIFF.toString()+" "+this.msgHolder.next()+"\r\n";
+					}
 					packtosend.setData(tosend.getBytes());
 					if (packtosend.getLength() != Prefixes.DIFF.normalMessLength ){
 						System.err.println("/!\\ Attention le message suivant de taille incorrecte à failli être envoyé"
@@ -76,9 +76,11 @@ public class Diffuseur{
 					thesender.send(packtosend);
 				}catch(NoSuchElementException ns){ // historique vide, on passe en sommeil
 						this.broadcastThreadIsWaiting = true;
+						System.out.println("Plus de message à diffuser pour le moment, mise en sommeil.");
 						synchronized(this.msgHolder){
 							msgHolder.wait();
 						}this.broadcastThreadIsWaiting = false;
+						System.out.println("Des messages sont disponibles à la diffusion, reprise.");
 						continue;
 				}catch (IOException ioex){
 					System.err.println(ioex.toString());
@@ -121,22 +123,20 @@ public class Diffuseur{
 	}
 
 	private void diffAlive(Socket so)throws IOException{
-		try (
-			PrintWriter out = new PrintWriter(so.getOutputStream());
-			BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));
-		){	char [] charbuf = new char [2];
-			in.read(charbuf);
-			if((Integer.valueOf((int)charbuf[0])==13 && Integer.valueOf((int)charbuf[0])==10) || in.ready()){
-				System.out.println("hhehehehhe"+(Integer.valueOf((int)charbuf[0]).toString())+"   " +Integer.valueOf((int)charbuf[1]).toString());
-					System.err.println("Une erreur est survenue avec "+so.getLocalSocketAddress().toString()+"l'en-tête était de taille incorrecte et étrange\n"
-							+"\ntaille attendue: "+Integer.valueOf(Prefixes.RUOK.normalMessLength -Prefixes.headerSZ )
-							+"\n il restait encore des choses à lire: "+Boolean.valueOf(in.ready()));
-					so.close();
-			}
-			out.print(Prefixes.IMOK+"\r\n");
-			out.flush();
+		PrintWriter out = new PrintWriter(so.getOutputStream());
+		BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));
+		char [] charbuf = new char [2];
+		in.read(charbuf);
+		if(Character.compare(charbuf[0],'\r')!=0 || Character.compare(charbuf[1],'\n')!=0 || in.ready()){
+			System.err.println("Une erreur est survenue avec "+so.getLocalSocketAddress().toString()
+				+"l'en-tête était de taille incorrecte et/pi étrange\n"
+				+"\ntaille attendue: "+Integer.valueOf(Prefixes.RUOK.normalMessLength -Prefixes.headerSZ )
+				+"\n il restait encore des choses à lire: "+Boolean.valueOf(in.ready()));
 			so.close();
-		}finally {}
+			return;
+		}
+		out.print(Prefixes.IMOK+"\r\n");
+		out.flush();
 	}
 
 	private void receiveLoop(){
@@ -153,24 +153,17 @@ public class Diffuseur{
 	
 	private void receiveLoopSwitchMan(Socket connSock) {
 		try{
-			byte[] mssgHeader = new byte[Prefixes.headerSZ];
-			if(Prefixes.headerSZ != connSock.getInputStream().read(mssgHeader)){
+			byte[] gestHeader = new byte[Prefixes.headerSZ];
+			if(Prefixes.headerSZ != connSock.getInputStream().read(gestHeader)){
 				connSock.close();return;
 			}
-			String headerCont = new String(mssgHeader);
+			String headerCont = new String(gestHeader);
 			if( headerCont.equals(Prefixes.LAST.toString())){
 				try{
 					System.out.println("L'entité connecté "+connSock.toString()+"souhaite récupérer des messages");
 					this.historygiver(connSock);
 				}catch(Exception e){
 					System.err.println(" Une erreur est apparue lors d'une demande d'historique: "+e.toString());
-				}
-			}else if (headerCont.equals(Prefixes.RUOK.toString())){
-				try{
-					System.out.println("L'entité connecté "+connSock.toString()+"souhaite savoir si le diffuseur est en ligne");
-					this.diffAlive(connSock);
-				}catch(Exception e){
-					System.err.println(" Une erreur est apparue lors d'une Vérification RUOK par un gestionnaire "+e.toString());
 				}
 			}else if(headerCont.equals(Prefixes.MESS.toString())){
 				try{
@@ -258,32 +251,103 @@ private  void historygiver(Socket commSock){
 			return;
 		}
 	}
+	public void addGestionnaireLink(InetAddress toRegister ,int port){
+			Thread t=new Thread(()->{toGestionnaire(toRegister,port);});
+			t.setDaemon(true);
+			t.start();
+		return;
+		}
 	
-	public void synchronized ToGestionnaire( InetAdress toRegister,int port){
-		try (Socket sock = new Socket (InetAdress,port);
+	public void toGestionnaire( InetAddress toRegister ,int port ){
+		try(
+			Socket sock = new Socket (toRegister,port);
 			OutputStream sendStream = sock.getOutputStream();
 			InputStream receiveStream =sock.getInputStream();	
 		){
-			System.out.println("Connexion établie avec un gestionnaire :"+sock.getInetAdress.toString()+" tentative d'enregistrement...");
-			String tosend = Prefixes.REGI.toString()+" "+this.id+" "+this.getLocalAddress()+" "+Integer.valueOf(this.getReceivePort)+" "+this.getMulticastSock.getInetAdress.toString()+" "+Integer.valueOf(this.getBroadcastPort)+"\r\n";//REGI␣id␣ip1␣port1␣ip2␣port2 
-			if(tosend.getBytes().length != Prefixes.REGI.normalMessLength){
+			System.out.println("Connexion établie avec un gestionnaire :"+sock.getInetAddress().toString()+" tentative d'enregistrement...");
+			String tosend = Prefixes.REGI.toString()
+				+" "
+				+this.id
+				+" "
+				+Diffuseur.Address4Filler(InetAddress.getLocalHost().getHostAddress())
+				+" "+Integer.valueOf(this.getReceivePort())
+				+" "
+				+Diffuseur.Address4Filler(this.getBroadcastAddress().getHostAddress())
+				+" "
+				+Integer.valueOf(this.getBroadcastPort())
+				+"\r\n"; //REGI␣id␣ip1␣port1␣ip2␣port2  REGI lediffo# 127.000.001.001 6663 225.010.020.030 6664
+				System.out.flush();
+			if(tosend.getBytes().length != Prefixes.REGI.normalMessLength || false ){
 				System.err.println("Tentative d'envoi d'un message d'enregistrement erroné à "
-				+sock.getInetAdress.toString()
-				+"\nle message :'"+tosend+"' \nfermeture de la connexion.");
+					+sock.getInetAddress().toString()
+					+"\nle message :'"+tosend
+					+"\nlongueur attendue :"
+					+Prefixes.REGI.normalMessLength
+					+"longueur obtenue :"
+					+tosend.getBytes().length 
+					+"' \nfermeture de la connexion.");
 				return;
+			}else{
+				sendStream.write(tosend.getBytes());
+				sendStream.flush();
 			}
-		}catch(IOException e){System.err.println("Exception IOE lors de l'enregistrement à un gestionnaire, arrêt");
+			byte[] checkreok =  sock.getInputStream().readNBytes​(Prefixes.headerSZ +2);
+			if(checkreok.length != Prefixes.headerSZ+2 || !new String(checkreok).equals(Prefixes.REOK.toString()+"\r\n")){
+				System.err.println("Le  Gestionnaire "+ sock.getInetAddress().toString() +" n'a pas confirmé l'enregistrement avec REOK," 
+				+"\nil a renvoyé à la place '"+new String(checkreok)
+				+"' Deconnexion du gestionnaire.");
+			}
+			System.out.println("enregistrement au gestionnaire "+sock.toString()+" réussi !");
+			while (true){
+				byte[] gestHeader = new byte[Prefixes.headerSZ];
+				if(Prefixes.headerSZ != sock.getInputStream().read(gestHeader)){
+					System.err.println("Le  Gestionnaire"+ sock.getInetAddress().toString() +"a envoyé un entête trop court. Déconnexion.");
+					return;
+				}
+				String headerCont = new String(gestHeader);
+				if(headerCont == Prefixes.MALL.toString()){
+					
+				}else if (headerCont.equals(Prefixes.RUOK.toString())){
+					try{
+						System.out.println("Le Gestionnaire "+sock.toString()+"souhaite savoir si le diffuseur est en ligne");
+						this.diffAlive(sock);
+					}catch(Exception e){
+						System.err.println(" Une erreur est apparue lors d'une Vérification RUOK par un gestionnaire "+e.toString());
+					}
+				}else{ 
+					sock.close();
+					System.err.println("Le  Gestionnaire"+ sock.getInetAddress().toString() +"a envoyé un entête inconnu.\n" 
+						+" l'entête :"
+						+headerCont
+						+" Déconnexion.");
+					return;
+				}
+			}
 		}catch(UnknownHostException e){ System.err.println("Exception 'Hôte Inconnu' lors de l'enregistrement à un gestionnaire, arrêt");
-		}catch(Exception e){System.err.println("Exception '"+e.toString()+ "' lors de l'enregistrement à un gestionnaire, arrêt");
+		}catch(IOException e){System.err.println("Exception IOE lors de l'enregistrement à un gestionnaire, arrêt");
+		//}catch(Exception e){System.err.println("Exception '"+e.toString()+ "' lors de la communication avec un gestionnaire, arrêt");
 		}	
-		
 	}
 	
-	public synchronized int getBroadcastPort(){return this.mltcstSock.getLocalPort();}
+	public synchronized int getBroadcastPort(){return this.mltcstSA.getPort();}
+	public synchronized InetAddress getBroadcastAddress(){return this.mltcstSA.getAddress();}
 	public synchronized int getReceivePort(){return this.rcvPrt;}
 	public synchronized long getFrequency(){return this.frqcy;}
 	public synchronized void setFrequency(long newFreq){this.frqcy = newFreq;}
-	private synchronized DatagramSocket getMulticastSock(){return this.mltcstSock;}
+	public static String Address4Filler(String address ){
+		if(address == null){
+			return "000.000.000.000";}
+		int point1;int point2;int point3;
+		point1=address.indexOf​( '.',  0);
+		point2=address.indexOf​( '.',  point1+1);
+		point3=address.indexOf​( '.',  point2+1);
+		return 
+		String.format("%03d",Integer.valueOf(address.substring(0,point1)))
+		+"."+String.format("%03d",Integer.valueOf(address.substring(point1+1,point2)))
+		+"."+String.format("%03d",Integer.valueOf(address.substring(point2+1,point3)))
+		+"."+String.format("%03d",Integer.valueOf(address.substring(point3+1,address.length())));
+	}
+
 	public static String getLocalAddress() throws UnknownHostException{return InetAddress.getLocalHost().toString();}
 	synchronized Holder getHolder(){/** à utiliser uniquement à des fins de débogage !  package private**/return this.msgHolder;}
 
@@ -297,7 +361,9 @@ private  void historygiver(Socket commSock){
 			}
 		}catch(NoSuchElementException ns){return;}
 		synchronized(lediff.msgHolder) {
-			lediff.msgHolder.notify();}
+			lediff.msgHolder.notify();
+			}
+			lediff.addGestionnaireLink(InetAddress.getByName("127.0.1.1"),6667);
 		try{
 		Object lock= new Object();
 		synchronized(lock){

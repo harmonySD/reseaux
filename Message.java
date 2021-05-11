@@ -1,3 +1,4 @@
+import java.io.UnsupportedEncodingException;
 public class Message {
 	// tailles fixée des données / nom utilisateur
 	public static final int IDSZ=8;
@@ -6,7 +7,14 @@ public class Message {
 	private final String id ;
 	private final String data  ;
 	
-	public Message(String userid, String message ){
+	public Message(String useraw, String messageraw ){
+		String userid;
+		String message;
+		try{ userid =new String(useraw.getBytes(),"ASCII");
+		 message=new String(messageraw.getBytes(),"ASCII");}catch(UnsupportedEncodingException e){
+			userid = useraw;
+			message=messageraw;
+			}
 		// stockage id de l'émetteur du message
 		if (userid.length() != Message.IDSZ ){
 			if (userid.length() > Message.IDSZ){this.id = userid.substring(0,Message.IDSZ);}
@@ -17,6 +25,7 @@ public class Message {
 			if (message.length() > Message.DATASZ){this.data = message.substring(0,Message.DATASZ);}
 			else{this.data = message+("#".repeat( Message.DATASZ - message.length() ));}
 		}else {this.data=message;}
+		
 	}
 	
 	@Override 
