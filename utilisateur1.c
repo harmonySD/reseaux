@@ -71,6 +71,7 @@ diffuseur connection_gestionnaire(char *argv, char *add){
         rec[taille_recu] = '\0';
         //get num_diff
         char *nbstr = strtok(rec, "LINB ");
+        printf("recu %s de l'addresse: %s avec un port: %d \n",rec,inet_ntoa((struct in_addr)adress_sock.sin_addr),ntohs(adress_sock.sin_port));
         int nb = atoi(nbstr);
         if(nb ==0){
           printf("Aucun diffuseur enregistré !\n");
@@ -161,7 +162,7 @@ void *sendMessage(void *coco) {
                 char recu[SM + FIN + BSLASH];
                 int taille_rec = recv(descr, recu, SM + FIN, 0);
                 recu[taille_rec] = '\0';
-                //printf("recu %s\n",recu); //Verification ACKM send
+                printf("recu %s de l'addresse: %s avec un port: %d \n",recu,inet_ntoa((struct in_addr)adress_sock2.sin_addr),ntohs(adress_sock2.sin_port)); //Verification ACKM send
                 if(strstr(recu,"ACKM") == NULL){
                     printf("Message non recu par le diffuseur");
                 }
@@ -186,11 +187,12 @@ void *sendMessage(void *coco) {
                         + ESP + SIZE_MESS + FIN, 0);
                 recu[taille_rec] = '\0';
                 while (strstr(recu,"ENDM") == NULL){
-                    printf("Message de l'historique :%s\n", recu);
+                    printf("Message de l'historique :%s \n", recu);
                     taille_rec = recv(descr, recu, SM + ESP + NUMMESS + ESP + SIZE_ID
                             + ESP + SIZE_MESS + FIN, 0);
                     recu[taille_rec] = '\0';
                 }
+                printf("recu %s de l'addresse %s avec le port %d\n",recu,inet_ntoa((struct in_addr)adress_sock2.sin_addr),ntohs(adress_sock2.sin_port));
             }
         }else{
             printf("Erreur connexion : Veuillez vous connecter plus tard (diffuseur non connecté)\r\n");
@@ -253,16 +255,20 @@ int main(int argc, char**argv){
     ID = verif_lenght(argv[4], SIZE_ID);
     //connection to the gestionnaire (TCP mode) which fill a structure with informations
     //about the chosen diffuseur  (randomly)
-    diffuseur diffuseur=connection_gestionnaire(argv[1],argv[2]);
-  //  printf("port1 %s\n",diffuseur.port1);
-  //  printf("ip1 %s\n",diffuseur.ip1);
-  //  printf("ip2 %s\n",diffuseur.ip2);
-  //  printf("port2 %s\n",diffuseur.port2);
-  //  printf("id %s",ID);
+   // diffuseur diffuseur=connection_gestionnaire(argv[1],argv[2]);
     printf("**********UTILISATEUR**********\n");
     printf("Id: %s\n",ID);
-    printf("*******************************\n");
-    connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID,TTY);
+    printf("*******************************\n\n");
+
+    // printf("le choix du gestionnaire: \n");
+    // printf("port1 %s\n",diffuseur.port1);
+    // printf("ip1 %s\n",diffuseur.ip1);
+    // printf("ip2 %s\n",diffuseur.ip2);
+    // printf("port2 %s\n",diffuseur.port2);
+    //connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID,TTY);
+    connection_diffuseur("6664","225.010.020.030","6663","127.000.000.001",ID,TTY);
+    
+
 
 
 

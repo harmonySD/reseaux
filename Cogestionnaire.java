@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -44,7 +45,7 @@ public class Cogestionnaire extends Thread{
                 out.flush();
                 //recoit
                 String mess = in.readLine();
-                //System.out.println(("recu "+mess));
+                System.out.println("recu "+mess+"de "+cs.toString());
                 String nbstr=mess.substring(5, mess.length());
                 int nb = Integer.parseInt(nbstr);
                 if(nb==0){
@@ -58,7 +59,7 @@ public class Cogestionnaire extends Thread{
                     }
                 }
             }else if(messageall==true){
-                System.out.println("Votre message a diffuser par tout les diffusuers: ");
+                System.out.println("Votre message a diffuser par tout les diffuseurs: ");
                 Scanner scn=new Scanner(System.in);
                 String messall=scn.nextLine();
                 String mes=completeIfNeeded(messall,140);
@@ -68,16 +69,18 @@ public class Cogestionnaire extends Thread{
                 out.flush();
                 //recu confiration ?
                 String mess = in.readLine();
-                System.out.println(("recu "+mess));
+                System.out.println("recu "+mess+"de "+cs.toString());
                 if(mess.equals("RALL")){System.out.println("Message bien recu par le gestionnaire");}
 
 
             }
             
 
-        } catch (Exception e){
+        }catch (ConnectException e){
+            System.out.print("aucun gestionnaire connecter a cette addresse :( \n");
+        } 
+        catch (Exception e){
             e.printStackTrace();
-            System.out.println("iciiciicicici");
         }
     }
 }
