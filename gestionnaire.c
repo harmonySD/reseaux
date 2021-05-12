@@ -36,23 +36,23 @@ void printAnnuraire(){
     }
 }
 
+// ajout de 0 au debut de str
 char *verif_lenght_nb(char *str, int size){
     char *nb = str;
     int size_nb = strlen(str);
     if(size_nb < size){
         char *nb2 = NULL;
         nb2 = malloc(size);
-        //add some 0 to the left
         for(int i = 0; i<(size - size_nb); i++){
             nb2[i] = '0';
         }
         strcat(nb2, nb);
         nb = nb2;
     }
-    //if size of nb bigger than size 
-    //we supposed its the max nb of messages 
+    //si la taille du nombre est plus grande que size 
+    //on suppose que cest le max de nombre de diffuseur
     else if(size_nb > size){
-        nb="999";
+        nb="99";
     }
     return nb;
 }
@@ -62,11 +62,13 @@ void recvClient(int sock){
     int tailleMessDiffu=SIZE_FORME+1+SIZE_ID+1+
                         SIZE_IP+1+SIZE_PORT+1+SIZE_IP+1+SIZE_PORT+FIN;
     char messNum[SIZE_FORME+1+NUMDIFF+FIN+1];
+    // envoie le nombre de message
     char numDiff[3];
     sprintf(numDiff,"%i",nbDiffu);
     sprintf(numDiff,"%s",verif_lenght_nb(numDiff,2));
     sprintf(messNum,"LINB %s\r\n",numDiff);
     send(sock,messNum,strlen(messNum),0);
+    // envoie les infos de chaque diffuseur
     for (int i=0;i<nbDiffu;i++){
         char envoieDiffu[tailleMessDiffu+1];
         strcpy(envoieDiffu,"ITEM ");
@@ -84,6 +86,7 @@ void actionDiffuseur(int sock,char *newDiffu){
         diffuseur *diffu=malloc(sizeof(diffuseur));
         pthread_mutex_lock(&verrou);
 
+        // ajoute le diffuseur dans l'annuaire
         char *strToken=strtok(newDiffu," ");
         strToken=strtok(NULL," ");
         strcpy(diffu->id,strToken);
@@ -99,8 +102,13 @@ void actionDiffuseur(int sock,char *newDiffu){
 
         nbDiffu+=1;
         pthread_mutex_unlock(&verrou);
+        printf("de ");
+        printDiffu(*diffu);
+        printf("\n");
         char *mess="REOK\r\n";
         send(sock,mess,strlen(mess),0);
+
+        // verifie si le diffuseur diffuse toujours
         miseAJour(sock, diffu);
     }
     else {
@@ -110,12 +118,15 @@ void actionDiffuseur(int sock,char *newDiffu){
     }
 }
 
+// demande si le diffuseur diffuse toujours 
+// et si non, l'enleve de la liste annuaire
 void miseAJour(int sock,diffuseur *diffu){
     int drapeau = 1;
     struct timeval tv;
     tv.tv_sec=15;
     tv.tv_usec=0;
     while(drapeau){
+        // le gestionnnaire envoie RUOK toutes les 30s
         sleep(30);
         char *mess="RUOK\r\n";
         send(sock,mess,strlen(mess),0);
@@ -127,6 +138,7 @@ void miseAJour(int sock,diffuseur *diffu){
         FD_SET(sock,&initial);
         fd_set rdfs;
         memcpy(&rdfs,&initial,sizeof(fd_set));
+        // le diffuseur a 15s pour repondre
         int ret=select(sock+1,&rdfs,NULL,NULL,&tv);
         while(ret>0){
             if(FD_ISSET(sock,&rdfs)){
@@ -135,9 +147,13 @@ void miseAJour(int sock,diffuseur *diffu){
                     imok[rec]='\0';
                 }
                 printf("Message recu %s",imok);
+                printf("de ");
+                printDiffu(*diffu);
+                printf("\n");
                 ret--;
             }
         }
+        // reponse incorrecte ou trop longue
         if(strcmp(imok,"IMOK\r\n")!=0){
             enleverDiffu(diffu);
             close(sock);
@@ -175,6 +191,7 @@ void mallDiffu(int sock, char *mess){
     close(sock);
 
     for(int i=0;i<nbDiffu;i++){
+        // se connecte en tant que client et envoie au diffuseur
         struct sockaddr_in adress_sock;
         adress_sock.sin_family = AF_INET;
         int p = atoi(annuaire[i].port2);
@@ -191,7 +208,9 @@ void mallDiffu(int sock, char *mess){
             int size_rec=recv(sockD,rall,sizeof(char)*(SIZE_FORME+1+FIN),0);
             rall[size_rec]='\0';
             printf("Message recu %s",rall);
-            // close(sockD);  
+            printf("de ");
+            printDiffu(annuaire[i]);
+            printf("\n");
         }
     }
 }
@@ -206,31 +225,24 @@ void *choixDiscussion(void *arg){
     newDiffu[recu]='\0';
     printf("Message recu %s",newDiffu);
 
-    // if(newDiffu[0]=='R' && newDiffu[1]=='E' && 
-    //     newDiffu[2]=='G' && newDiffu[2]=='I' &&
-    //     newDiffu[recu-1]=='\n' &&
-    //     newDiffu[recu-2]=='\r'){
-    //     actionDiffuseur(sock,newDiffu);
-    // }
-    if(strstr(newDiffu,"REGI")){
+    // enregistremetn d'un diffuseur
+    if(newDiffu[0]=='R' && newDiffu[1]=='E' && 
+        newDiffu[2]=='G' && newDiffu[3]=='I' &&
+        newDiffu[recu-1]=='\n' &&
+        newDiffu[recu-2]=='\r' ){
         actionDiffuseur(sock,newDiffu);
     }
-    else if(strstr(newDiffu,"LIST")){
+    // list des diffuseur au client
+    else if(strcmp(newDiffu,"LIST\r\n")==0){
         recvClient(sock);
     }
-    // else if(strcmp(newDiffu,"LIST\r\n")==0){
-    //     recvClient(sock);
-    // }
-    else if(strstr(newDiffu,"MALL")){
+    // message du client a transmettre a tous les diffuseurs
+    else if(newDiffu[0]=='M' && newDiffu[1]=='A' && 
+        newDiffu[2]=='L' && newDiffu[3]=='L' &&
+        newDiffu[recu-1]=='\n' &&
+        newDiffu[recu-2]=='\r'){
         mallDiffu(sock,newDiffu);
     }
-
-    // else if(newDiffu[0]=='M' && newDiffu[1]=='A' && 
-    //     newDiffu[2]=='L' && newDiffu[2]=='L' &&
-    //     newDiffu[recu-1]=='\n' &&
-    //     newDiffu[recu-2]=='\r'){
-    //     mallDiffu(sock,newDiffu);
-    // }
     else {
         close(sock);
     }
@@ -271,6 +283,7 @@ void choix(int p){
     else perror("Erreur du bind diffu\n");
 }
 
+// main
 int main(int argc, char**argv){
     if(argc != 2){
         printf("Erreur il faut fournir un numero de port");
@@ -280,8 +293,3 @@ int main(int argc, char**argv){
     choix(p);
     return 0;
 }
-
-
-// jai un pb pour le RUOK, je narrive pas a faire en sorte que si le diffuseur ne repond au bout dun certain temps ca deconnecte
-// jai essayé avec poll comme dans le cours, mais cela marche en udp, or notre gestionnaire ne parle quen tcp, et jarrive pas a adapter pour que ca marche en tcp
-// donc si qql a une idee, je prends

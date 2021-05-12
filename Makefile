@@ -21,7 +21,7 @@ gestio: gestionnaire.o
 
 
 cleanall :
-	rm -rf *.o main *~
+	rm -rf *.o main *~ $(ALL)
 
 clean:
 	rm -rf *~ $(ALL)
