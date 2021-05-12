@@ -269,12 +269,13 @@ private  void historygiver(Socket commSock){
 				+" "
 				+this.id
 				+" "
-				+Diffuseur.Address4Filler(InetAddress.getLocalHost().getHostAddress())
-				+" "+Integer.valueOf(this.getReceivePort())
-				+" "
 				+Diffuseur.Address4Filler(this.getBroadcastAddress().getHostAddress())
 				+" "
 				+Integer.valueOf(this.getBroadcastPort())
+				+" "
+				+Diffuseur.Address4Filler(InetAddress.getLocalHost().getHostAddress())
+				+" "
+				+Integer.valueOf(this.getReceivePort())
 				+"\r\n"; //REGI␣id␣ip1␣port1␣ip2␣port2  REGI lediffo# 127.000.001.001 6663 225.010.020.030 6664
 				System.out.flush();
 			if(tosend.getBytes().length != Prefixes.REGI.normalMessLength || false ){
