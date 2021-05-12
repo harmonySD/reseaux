@@ -1,4 +1,6 @@
-import java.io.UnsupportedEncodingException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
+
 public class Message {
 	// tailles fixée des données / nom utilisateur
 	public static final int IDSZ=8;
@@ -8,13 +10,14 @@ public class Message {
 	private final String data  ;
 	
 	public Message(String useraw, String messageraw ){
-		String userid;
-		String message;
-		try{ userid =new String(useraw.getBytes(),"ASCII");
-		 message=new String(messageraw.getBytes(),"ASCII");}catch(UnsupportedEncodingException e){
-			userid = useraw;
-			message=messageraw;
-			}
+		
+		
+		
+		
+		String userid = Normalizer.normalize(useraw, Form.NFD) .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");// cette ligne de code a été récupérée sur internet
+		String message = Normalizer.normalize(messageraw, Form.NFD) .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");// cette ligne de code a été récupérée sur internet
+		// ces lignes ont ete recuperes sur https://www.drillio.com/en/2011/java-remove-accent-diacritic/
+		
 		// stockage id de l'émetteur du message
 		if (userid.length() != Message.IDSZ ){
 			if (userid.length() > Message.IDSZ){this.id = userid.substring(0,Message.IDSZ);}

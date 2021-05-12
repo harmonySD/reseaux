@@ -329,7 +329,7 @@ private  void historygiver(Socket commSock){
 				}
 			}
 		}catch(UnknownHostException e){ System.err.println("Exception 'Hôte Inconnu' lors de l'enregistrement à un gestionnaire, arrêt");
-		}catch(IOException e){System.err.println("Exception IOE lors de l'enregistrement à un gestionnaire, arrêt");
+		}catch(IOException e){System.err.println("Exception IOE lors de l'enregistrement à un gestionnaire, déconnexion du gestionnaire.");
 		}catch(Exception e){System.err.println("Exception '"+e.toString()+ "' lors de la communication avec un gestionnaire, arrêt");
 		}	
 	}
@@ -392,7 +392,7 @@ private  void historygiver(Socket commSock){
 		synchronized(lediff.msgHolder) {
 			lediff.msgHolder.notify();
 			}
-			lediff.addGestionnaireLink(InetAddress.getByName("127.0.1.1"),6667);
+			lediff.addGestionnaireLink(InetAddress.getByName("127.0.1.1"),4444);
 		try{
 		Object lock= new Object();
 		synchronized(lock){
