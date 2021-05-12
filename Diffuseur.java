@@ -133,7 +133,7 @@ public class Diffuseur{
 				+"\ntaille attendue: "+Integer.valueOf(Prefixes.RUOK.normalMessLength -Prefixes.headerSZ )
 				+"\n il restait encore des choses à lire: "+Boolean.valueOf(in.ready()));
 			so.close();
-			return;
+			throw new IOException("Le gestionnaire "+so.getInetAddress()+"a mal commniqué avec le diffuseur lors d'un RUOK ");
 		}
 		out.print(Prefixes.IMOK+"\r\n");
 		out.flush();
@@ -296,6 +296,7 @@ private  void historygiver(Socket commSock){
 				System.err.println("Le  Gestionnaire "+ sock.getInetAddress().toString() +" n'a pas confirmé l'enregistrement avec REOK," 
 				+"\nil a renvoyé à la place '"+new String(checkreok)
 				+"' Deconnexion du gestionnaire.");
+				return;
 			}
 			System.out.println("enregistrement au gestionnaire "+sock.toString()+" réussi !");
 			while (true){
@@ -305,17 +306,21 @@ private  void historygiver(Socket commSock){
 					return;
 				}
 				String headerCont = new String(gestHeader);
-				if(headerCont == Prefixes.MALL.toString()){
-					
+				if(headerCont.equals(Prefixes.MALL.toString())){
+					System.out.println("Le Gestionnaire "+sock.toString()+" souhaite communiquer au diffuseur un message à stocker");
+					try{gestionnaireMess(sock);} catch(Exception e){
+						System.err.println(" Une erreur est apparue lors d'un ajout de message MALL par un gestionnaire arret :"+e.toString());
+						return;
+						}
 				}else if (headerCont.equals(Prefixes.RUOK.toString())){
 					try{
 						System.out.println("Le Gestionnaire "+sock.toString()+"souhaite savoir si le diffuseur est en ligne");
 						this.diffAlive(sock);
 					}catch(Exception e){
-						System.err.println(" Une erreur est apparue lors d'une Vérification RUOK par un gestionnaire "+e.toString());
+						System.err.println(" Une erreur est apparue lors d'une Vérification RUOK par un gestionnaire arret"+e.toString());
+						return;
 					}
 				}else{ 
-					sock.close();
 					System.err.println("Le  Gestionnaire"+ sock.getInetAddress().toString() +"a envoyé un entête inconnu.\n" 
 						+" l'entête :"
 						+headerCont
@@ -325,8 +330,32 @@ private  void historygiver(Socket commSock){
 			}
 		}catch(UnknownHostException e){ System.err.println("Exception 'Hôte Inconnu' lors de l'enregistrement à un gestionnaire, arrêt");
 		}catch(IOException e){System.err.println("Exception IOE lors de l'enregistrement à un gestionnaire, arrêt");
-		//}catch(Exception e){System.err.println("Exception '"+e.toString()+ "' lors de la communication avec un gestionnaire, arrêt");
+		}catch(Exception e){System.err.println("Exception '"+e.toString()+ "' lors de la communication avec un gestionnaire, arrêt");
 		}	
+	}
+	
+	private void gestionnaireMess(Socket so)throws IOException{
+		//envoit
+		PrintWriter out = new PrintWriter(so.getOutputStream());
+		//recoit
+		BufferedReader in = new BufferedReader(new InputStreamReader(so.getInputStream()));
+		char [] buffer =  new char[Prefixes.MESS.normalMessLength - Prefixes.headerSZ];
+		//on recoit 
+		int  nbrecu= in.read(buffer);
+		if(nbrecu != Prefixes.MALL.normalMessLength - Prefixes.headerSZ || in.ready() ) {
+			System.err.println("Une erreur est survenue avec "+so.getLocalSocketAddress().toString()+"l'en-tête était de taille incorrecte;\n"
+				+"taille attendue: "+(Prefixes.MESS.normalMessLength - Prefixes.headerSZ )
+				+"taille obtenue: "+Integer.valueOf(nbrecu)
+				+"\n il restait encore des choses à lire: "+Boolean.valueOf(in.ready()));
+				throw new IOException("Le gestionnaire "+so.getInetAddress()+"a mal commniqué avec le diffuseur lors d'un MALL ");
+		}
+		String recu = new String(buffer);
+		String id=recu.substring(1,9);
+		String mess=recu.substring(9, 150);
+		this.addAMessage(new Message(id, mess));
+		out.print(Prefixes.ACKM +"\r\n");
+		out.flush();
+		
 	}
 	
 	public synchronized int getBroadcastPort(){return this.mltcstSA.getPort();}
