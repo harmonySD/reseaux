@@ -14,7 +14,7 @@ public class Diffuseur{
 	private  int rcvPrt;
 	private ServerSocket rcvSock;
 	private InetSocketAddress mltcstSA;
-	private  long frqcy= 2500;
+	private  long frqcy= 150;
 	private Holder msgHolder  ;
 	private  Thread broadcastThread ;
 	private  boolean broadcastThreadIsWaiting = false; // le SEUL modifieur est broadCastLoop
@@ -33,8 +33,7 @@ public class Diffuseur{
 			if (MultiCasterID.length() > Message.IDSZ){this.id = MultiCasterID.substring(0,Message.IDSZ);}// cas trop long
 			else{this.id = MultiCasterID+("#".repeat( Message.IDSZ - MultiCasterID.length() ));} // cas trop court 
 		}else {this.id=MultiCasterID;}// exactement 8 caractères
-		this.localMode = Boolean.getBoolean(localMde);
-
+		this.localMode = Boolean.valueOf​(localMde);
 
 		this.rcvPrt = recvPort ;
 		this.mltcstSA = new InetSocketAddress(multiCastAddress,multiCastPort);
@@ -366,7 +365,7 @@ private  void historygiver(Socket commSock){
 	synchronized Holder getHolder(){/** à utiliser uniquement à des fins de débogage !  package private**/return this.msgHolder;}
 
 	public static void main (String [] args)throws Exception {
-		Diffuseur lediff = new Diffuseur(args[0], args[1],Integer.valueOf(args[1]), Integer.valueOf(args[2]),args[3]);
+		Diffuseur lediff = new Diffuseur(args[0], args[1],Integer.valueOf(args[2]), Integer.valueOf(args[3]),args[4]);
 		try(Scanner sc = new Scanner(System.in);){
 			String temp;
 			for(int i =0;i<90;i++){
