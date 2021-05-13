@@ -14,8 +14,8 @@ public class Message {
 		
 		
 		
-		String userid = Normalizer.normalize(useraw, Form.NFD) .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");// cette ligne de code a été récupérée sur internet
-		String message = Normalizer.normalize(messageraw, Form.NFD) .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");// cette ligne de code a été récupérée sur internet
+		String userid = Normalizer.normalize(useraw, Form.NFD) .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");// CETTE LIGNE DE CODE A ETE RECUPEREE SUR INTERNET
+		String message = Normalizer.normalize(messageraw, Form.NFD) .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");// CETTE LIGNE DE CODE A ETE RECUPEREE SUR INTERNET
 		// ces lignes ont ete recuperes sur https://www.drillio.com/en/2011/java-remove-accent-diacritic/
 		
 		// stockage id de l'émetteur du message

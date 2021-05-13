@@ -22,13 +22,20 @@ public class Diffuseur{
 	public final boolean startBroadcast(){this.broadcastThread.start(); return true;}
 	public final boolean startListen(){this.receiveThread.start(); return true;}
 	public static final int MAXHISTORY = 999;
+	public final boolean localMode;
 	
-	public Diffuseur(String MultiCasterID, int recvPort,  int multiCastPort, String multiCastAddress ) 
+	public Diffuseur(String MultiCasterID,String localMde, int recvPort,  int multiCastPort, String multiCastAddress ) 
 	throws SocketException,UnknownHostException,IOException {
-		if(recvPort <0 || multiCastPort <0  || recvPort > 65535|| multiCastPort > 65535 ){
+		if(recvPort <0 || multiCastPort <0  || recvPort > 9999|| multiCastPort > 9999 ){ // 9999 car on n'admet que les ports jusqu'à 4 chiffres
 			throw new IllegalArgumentException("Port  incorrect");
 		}
-		this.id = MultiCasterID; // pas de sécurité max 8 caractères
+		if (MultiCasterID.length() != Message.IDSZ ){
+			if (MultiCasterID.length() > Message.IDSZ){this.id = MultiCasterID.substring(0,Message.IDSZ);}// cas trop long
+			else{this.id = MultiCasterID+("#".repeat( Message.IDSZ - MultiCasterID.length() ));} // cas trop court 
+		}else {this.id=MultiCasterID;}// exactement 8 caractères
+		this.localMode = Boolean.getBoolean(localMde);
+
+
 		this.rcvPrt = recvPort ;
 		this.mltcstSA = new InetSocketAddress(multiCastAddress,multiCastPort);
 		this.msgHolder = new Holder();
@@ -135,6 +142,13 @@ public class Diffuseur{
 			so.close();
 			throw new IOException("Le gestionnaire "+so.getInetAddress()+"a mal commniqué avec le diffuseur lors d'un RUOK ");
 		}
+		synchronized(this){if(broadcastThreadIsWaiting){
+			System.out.println("Le gestionnaire "+so.getInetAddress()+" voulais savoir si le diffuseur était entrain de diffuser mais ce n'était pas le cas,"
+			+"en conséquence la connexion va être fermée avec le gestionnaire.");
+			so.close();
+			throw new IOException("La connexion a été fermée avec un gestionnaire pour cause de RUOK alors qu'on ne diffusait pas.");
+			}
+		}
 		out.print(Prefixes.IMOK+"\r\n");
 		out.flush();
 	}
@@ -190,7 +204,7 @@ private  void historygiver(Socket commSock){
 			String mssgContent = new String(buffer);
 			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ  != mssgContent.length()
 					|| bfred.ready()){
-				System.err.println("Une erreur est survenue avec "+commSock.getLocalSocketAddress().toString()+"le contenu aprè LAST était de taille incorrecte;\n"
+				System.err.println("Une erreur est survenue avec "+commSock.getLocalSocketAddress().toString()+"le contenu après LAST était de taille incorrecte;\n"
 						+"taille attendue: "+Integer.valueOf(Prefixes.LAST.normalMessLength -Prefixes.headerSZ )
 						+"taille obtenue: "+Integer.valueOf(mssgContent.length())
 						+"\n il restait encore des choses à lire: "+Boolean.valueOf(bfred.ready()));
@@ -271,11 +285,11 @@ private  void historygiver(Socket commSock){
 				+" "
 				+Diffuseur.Address4Filler(this.getBroadcastAddress().getHostAddress())
 				+" "
-				+Integer.valueOf(this.getBroadcastPort())
+				+String.format("%04d",this.getBroadcastPort())
 				+" "
-				+Diffuseur.Address4Filler(InetAddress.getLocalHost().getHostAddress())
+				+(this.localMode == true ? "127.000.000.001":Diffuseur.Address4Filler(InetAddress.getLocalHost().getHostAddress()))
 				+" "
-				+Integer.valueOf(this.getReceivePort())
+				+String.format("%04d",this.getReceivePort())
 				+"\r\n"; //REGI␣id␣ip1␣port1␣ip2␣port2  REGI lediffo# 127.000.001.001 6663 225.010.020.030 6664
 				System.out.flush();
 			if(tosend.getBytes().length != Prefixes.REGI.normalMessLength || false ){
@@ -307,13 +321,6 @@ private  void historygiver(Socket commSock){
 					return;
 				}
 				String headerCont = new String(gestHeader);
-				//~ if(headerCont.equals(Prefixes.MALL.toString())){
-					//~ System.out.println("Le Gestionnaire "+sock.toString()+" souhaite communiquer au diffuseur un message à stocker");
-					//~ try{gestionnaireMess(sock);} catch(Exception e){
-						//~ System.err.println(" Une erreur est apparue lors d'un ajout de message MALL par un gestionnaire arret :"+e.toString());
-						//~ return;
-						//~ }
-				//~ }else
 				 if (headerCont.equals(Prefixes.RUOK.toString())){
 					try{
 						System.out.println("Le Gestionnaire "+sock.toString()+"souhaite savoir si le diffuseur est en ligne");
@@ -359,7 +366,7 @@ private  void historygiver(Socket commSock){
 	synchronized Holder getHolder(){/** à utiliser uniquement à des fins de débogage !  package private**/return this.msgHolder;}
 
 	public static void main (String [] args)throws Exception {
-		Diffuseur lediff = new Diffuseur(args[0], Integer.valueOf(args[1]), Integer.valueOf(args[2]),args[3]);
+		Diffuseur lediff = new Diffuseur(args[0], args[1],Integer.valueOf(args[1]), Integer.valueOf(args[2]),args[3]);
 		try(Scanner sc = new Scanner(System.in);){
 			String temp;
 			for(int i =0;i<90;i++){
@@ -370,7 +377,7 @@ private  void historygiver(Socket commSock){
 		synchronized(lediff.msgHolder) {
 			lediff.msgHolder.notify();
 			}
-			lediff.addGestionnaireLink(InetAddress.getByName("127.0.1.1"),4444);
+			lediff.addGestionnaireLink(InetAddress.getByName("127.0.1.1"),4444); //ICI LE CHOIX DU GESTIONNAIRE
 		try{
 		Object lock= new Object();
 		synchronized(lock){
