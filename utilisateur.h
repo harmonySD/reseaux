@@ -36,6 +36,7 @@ typedef struct{
 
 extern char *verif_lenght(char *str, int size);
 extern char *verif_lenght_nb(char *str, int size);
+extern void verif_ip(char *ip,char *ipv);
 extern diffuseur connection_gestionnaire(char *argv,char *add);
 extern void *sendMessage(void *sock_desc);
 extern void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *id, char *tty);

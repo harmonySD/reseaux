@@ -22,6 +22,7 @@
 extern void printDiffu(diffuseur diffu);
 extern void printAnnuraire();
 extern char *verif_lenght_nb(char *str, int size);
+extern void verif_ip(char *ip,char *ipv);
 extern void recvClient(int sock);
 extern void actionDiffuseur(int sock,char *newDiffu);
 extern void miseAJour(int sock,diffuseur *diffu);
