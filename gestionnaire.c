@@ -57,8 +57,54 @@ char *verif_lenght_nb(char *str, int size){
     return nb;
 }
 
+// enleve les 0 en trop dans l'ip
+void verif_ip(char *ip,char *ipv){
+    int i=0;
+    int pt=0;
+    char * token =strtok(ip,".");
+    //split ip with .
+    while (token != NULL)
+    {
+        if(token[0]=='0'){
+            if(token[1]=='0'){
+                if(token[2]=='0'){
+                    //if 000 then we want 0
+                    ipv[i]='0';
+                    i++;
+                }else{
+                    ipv[i]=token[2];
+                    i++;
+                }
+            }else{
+                ipv[i]=token[1];
+                i++;
+                ipv[i]=token[2];
+                i++;
+            }
+
+        }else{
+            ipv[i]=token[0];
+            i++;
+            ipv[i]=token[1];
+            i++;
+            ipv[i]=token[2];
+            i++;
+        }
+        if (pt<3)
+        {
+            ipv[i]='.';
+            i++;
+            pt++;
+        }
+        token=strtok(NULL,".");
+    }
+    ipv[i]='\0';
+}
+
+
 // donne la liste des diffuseurs au client
 void recvClient(int sock){
+    printf("\n");
     int tailleMessDiffu=SIZE_FORME+1+SIZE_ID+1+
                         SIZE_IP+1+SIZE_PORT+1+SIZE_IP+1+SIZE_PORT+FIN;
     char messNum[SIZE_FORME+1+NUMDIFF+FIN+1];
@@ -186,6 +232,7 @@ void enleverDiffu(diffuseur *diffu){
 
 // envoie de mess a tous les diffuseurs de annuaire
 void mallDiffu(int sock, char *mess){
+    printf("\n");
     char *messR="RALL\r\n";
     send(sock,messR,strlen(messR),0);
     close(sock);
@@ -196,7 +243,9 @@ void mallDiffu(int sock, char *mess){
         adress_sock.sin_family = AF_INET;
         int p = atoi(annuaire[i].port2);
         adress_sock.sin_port = htons(p);
-        inet_aton(annuaire[i].ip2,&adress_sock.sin_addr);
+        char ipZero[SIZE_IP+1];
+        verif_ip(annuaire[i].ip2,ipZero);
+        inet_aton(ipZero,&adress_sock.sin_addr);
 
         int sockD=socket(PF_INET,SOCK_STREAM,0);
         int r=connect(sockD,(struct sockaddr *)&adress_sock,
