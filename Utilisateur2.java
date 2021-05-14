@@ -42,9 +42,7 @@ public class Utilisateur2{
                     
                     atcp.start();
                     audp.start();
-                    //while(atcp.isAlive()){}
-                    atcp.join();
-                    audp.join();
+                    while(atcp.isAlive()){}
                     audp.stops();
                 }
                 else if(choix.equals("gestionnaire")){
