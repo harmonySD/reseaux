@@ -64,9 +64,9 @@ public class AttendTCP extends Thread{
                     out.flush();
                     //recoit
                     String mess = in.readLine();
-                    System.out.println(("recu "+mess));
+                    System.out.println("recu "+mess+"de "+cs.toString());
                     if(!mess.equals("ACKM")){
-                        System.out.println("message non recu par le diffusuer");
+                        System.out.println("message non recu par le diffuseur");
                     }
 
                 }
@@ -84,6 +84,8 @@ public class AttendTCP extends Thread{
                         mess = in.readLine();
                         System.out.println(mess);
                     }
+                    System.out.println(mess+"de "+cs.toString());
+
 
 
                 }

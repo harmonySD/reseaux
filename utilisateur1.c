@@ -51,6 +51,48 @@ char *verif_lenght_nb(char *str, int size){
     return nb;
 }
 
+void verif_ip(char *ip,char *ipv){
+  //  char ipv[16];
+    int i=0;
+    int pt=0;
+    char * token =strtok(ip,".");
+    while (token != NULL)
+    {
+        printf("%s\n",token);
+        if(token[0]=='0'){
+            if(token[1]=='0'){
+                if(token[2]=='0'){
+                    ipv[i]='0';
+                    i++;
+                }else{
+                    ipv[i]=token[2];
+                    i++;
+                }
+            }else{
+                ipv[i]=token[1];
+                i++;
+                ipv[i]=token[2];
+                i++;
+            }
+
+        }else{
+            ipv[i]=token[0];
+            i++;
+            ipv[i]=token[1];
+            i++;
+            ipv[i]=token[2];
+            i++;
+        }
+        if (pt<3)
+        {
+            ipv[i]='.';
+            i++;
+            pt++;
+        }
+        token=strtok(NULL,".");
+    }
+    ipv[i]='\0';
+}
 
 diffuseur connection_gestionnaire(char *argv, char *add){
     int p = atoi(argv);
@@ -71,6 +113,7 @@ diffuseur connection_gestionnaire(char *argv, char *add){
         rec[taille_recu] = '\0';
         //get num_diff
         char *nbstr = strtok(rec, "LINB ");
+        printf("recu %s de l'addresse: %s avec un port: %d \n",rec,inet_ntoa((struct in_addr)adress_sock.sin_addr),ntohs(adress_sock.sin_port));
         int nb = atoi(nbstr);
         if(nb ==0){
           printf("Aucun diffuseur enregistré !\n");
@@ -161,7 +204,7 @@ void *sendMessage(void *coco) {
                 char recu[SM + FIN + BSLASH];
                 int taille_rec = recv(descr, recu, SM + FIN, 0);
                 recu[taille_rec] = '\0';
-                //printf("recu %s\n",recu); //Verification ACKM send
+                printf("recu %s de l'addresse: %s avec un port: %d \n",recu,inet_ntoa((struct in_addr)adress_sock2.sin_addr),ntohs(adress_sock2.sin_port)); //Verification ACKM send
                 if(strstr(recu,"ACKM") == NULL){
                     printf("Message non recu par le diffuseur");
                 }
@@ -186,11 +229,12 @@ void *sendMessage(void *coco) {
                         + ESP + SIZE_MESS + FIN, 0);
                 recu[taille_rec] = '\0';
                 while (strstr(recu,"ENDM") == NULL){
-                    printf("Message de l'historique :%s\n", recu);
+                    printf("Message de l'historique :%s \n", recu);
                     taille_rec = recv(descr, recu, SM + ESP + NUMMESS + ESP + SIZE_ID
                             + ESP + SIZE_MESS + FIN, 0);
                     recu[taille_rec] = '\0';
                 }
+                printf("recu %s de l'addresse %s avec le port %d\n",recu,inet_ntoa((struct in_addr)adress_sock2.sin_addr),ntohs(adress_sock2.sin_port));
             }
         }else{
             printf("Erreur connexion : Veuillez vous connecter plus tard (diffuseur non connecté)\r\n");
@@ -213,7 +257,17 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
     r = bind(sock, (struct sockaddr *)&address_sock, sizeof(struct sockaddr_in));
 
     struct ip_mreq mreq;
-    mreq.imr_multiaddr.s_addr  = inet_addr(ip1);
+    char ip[16];
+    // strcpy(ip,ip1);
+    // ip[16]='\0';
+
+    strncpy(ip,ip1,SIZE_IP);
+    ip[SIZE_IP]='\0';
+    
+    char ipv[16];
+    verif_ip(ip,ipv);
+    printf("ipv %s\n",ipv);
+    mreq.imr_multiaddr.s_addr  = inet_addr(ipv);
     mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 
     r = setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
@@ -222,7 +276,15 @@ void connection_diffuseur(char *port1, char *ip1, char *port2, char *ip2, char *
         struct sockaddr_in adress_sock2;
         adress_sock2.sin_family = AF_INET;
         adress_sock2.sin_port = htons(atoi(port2));
-        inet_aton(ip2, &adress_sock2.sin_addr);
+        char ip22[16];
+        strncpy(ip22,ip2,SIZE_IP);
+        ip22[SIZE_IP]='\0';
+        // strcpy(ip22,ip2);
+        // ip22[16]='\0';
+        char ip2v[16];
+        verif_ip(ip22,ip2v);
+        printf("%s\n",ip2v);
+        inet_aton(ip2v, &adress_sock2.sin_addr);
 
         connex coco;
         coco.adress_sock=adress_sock2;
@@ -254,15 +316,19 @@ int main(int argc, char**argv){
     //connection to the gestionnaire (TCP mode) which fill a structure with informations
     //about the chosen diffuseur  (randomly)
     diffuseur diffuseur=connection_gestionnaire(argv[1],argv[2]);
-  //  printf("port1 %s\n",diffuseur.port1);
-  //  printf("ip1 %s\n",diffuseur.ip1);
-  //  printf("ip2 %s\n",diffuseur.ip2);
-  //  printf("port2 %s\n",diffuseur.port2);
-  //  printf("id %s",ID);
     printf("**********UTILISATEUR**********\n");
     printf("Id: %s\n",ID);
-    printf("*******************************\n");
+    printf("*******************************\n\n");
+
+    // printf("le choix du gestionnaire: \n");
+    // printf("port1 %s\n",diffuseur.port1);
+    // printf("ip1 %s\n",diffuseur.ip1);
+    // printf("ip2 %s\n",diffuseur.ip2);
+    // printf("port2 %s\n",diffuseur.port2);
     connection_diffuseur(diffuseur.port1,diffuseur.ip1,diffuseur.port2,diffuseur.ip2,ID,TTY);
+    //connection_diffuseur("6664","225.010.020.030","6663","127.000.000.001",ID,TTY);
+    
+
 
 
 

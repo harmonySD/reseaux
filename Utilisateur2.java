@@ -15,6 +15,7 @@ public class Utilisateur2{
         return src;
     }
 
+
     public static void main(String[] args){
         String pseudo = completeIfNeeded(args[0],8);
         Scanner sc=new Scanner(System.in);
@@ -41,8 +42,9 @@ public class Utilisateur2{
                     
                     atcp.start();
                     audp.start();
-                    while(atcp.isAlive()){}
-
+                    //while(atcp.isAlive()){}
+                    atcp.join();
+                    audp.join();
                     audp.stops();
                 }
                 else if(choix.equals("gestionnaire")){
@@ -50,9 +52,20 @@ public class Utilisateur2{
                     String port = sc.nextLine();
                     System.out.println("addresse : ");
                     String add = sc.nextLine();
-                    Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(port),add);
-                    cg.start();
-                    Thread.sleep(500);
+                    System.out.println("Message pour tout les diffuseurs ? y/n :");
+                    String rep= sc.nextLine();
+                    if(rep.equals("n")){
+                         Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(port),add,false,pseudo);
+                         cg.start();
+                         while(cg.isAlive()){}
+                    }
+                    else if (rep.equals("y")){
+                         Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(port), add, true,pseudo);
+                         cg.start();
+                         while(cg.isAlive()){}
+    
+                    }
+
                 }
             }
         } catch (Exception e){

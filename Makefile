@@ -10,7 +10,7 @@ CLASSES =\
 		Utilisateur2.java \
 		AttendUDP.java \
 		AttendTCP.java \
-		Cogestionnaire.java
+		Cogestionnaire.java 
 
 ALL=gestio client Utilisateur2
 
