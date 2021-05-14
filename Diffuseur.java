@@ -14,7 +14,7 @@ public class Diffuseur{
 	private  int rcvPrt;
 	private ServerSocket rcvSock;
 	private InetSocketAddress mltcstSA;
-	private  long frqcy= 150;
+	private  long frqcy= 1000;
 	private Holder msgHolder  ;
 	private  Thread broadcastThread ;
 	private  boolean broadcastThreadIsWaiting = false; // le SEUL modifieur est broadCastLoop
@@ -368,7 +368,7 @@ private  void historygiver(Socket commSock){
 		Diffuseur lediff = new Diffuseur(args[0], args[1],Integer.valueOf(args[2]), Integer.valueOf(args[3]),args[4]);
 		try(Scanner sc = new Scanner(System.in);){
 			String temp;
-			for(int i =0;i<90;i++){
+			for(int i =0;i<220;i++){
 				temp = sc.nextLine();
 				lediff.addAMessage(new Message("M0ral3s",temp));	
 			}
