@@ -7,7 +7,7 @@ public class Utilisateur2{
     public static String completeIfNeeded(String src, int wantedsz){
         int manytofill = wantedsz - src.length();
         if(manytofill>0){
-          return src + "#".repeat(manytofill);  
+          return src + "#".repeat(manytofill);
         }
         else if(manytofill<0){
             return src.substring(0, wantedsz);
@@ -39,12 +39,10 @@ public class Utilisateur2{
                                         "******************************");
                     AttendTCP atcp = new AttendTCP(Integer.parseInt(port2), ip2, pseudo);
                     AttendUDP audp = new AttendUDP(Integer.parseInt(port1),ip1);
-                    
+
                     atcp.start();
                     audp.start();
-                    //while(atcp.isAlive()){}
-                    atcp.join();
-                    audp.join();
+                    while(atcp.isAlive()){}
                     audp.stops();
                 }
                 else if(choix.equals("gestionnaire")){
@@ -63,7 +61,7 @@ public class Utilisateur2{
                          Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(port), add, true,pseudo);
                          cg.start();
                          while(cg.isAlive()){}
-    
+
                     }
 
                 }
