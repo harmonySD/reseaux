@@ -42,8 +42,9 @@ public class Utilisateur2{
                     
                     atcp.start();
                     audp.start();
-                    while(atcp.isAlive()){}
-
+                    //while(atcp.isAlive()){}
+                    atcp.join();
+                    audp.join();
                     audp.stops();
                 }
                 else if(choix.equals("gestionnaire")){
@@ -62,6 +63,7 @@ public class Utilisateur2{
                          Cogestionnaire cg = new Cogestionnaire(Integer.parseInt(port), add, true,pseudo);
                          cg.start();
                          while(cg.isAlive()){}
+    
                     }
 
                 }
