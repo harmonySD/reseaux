@@ -45,7 +45,7 @@ public class Cogestionnaire extends Thread{
                 out.flush();
                 //recoit
                 String mess = in.readLine();
-                System.out.println("recu "+mess+"de "+cs.toString());
+                System.out.println("recu "+mess+" de "+cs.toString());
                 String nbstr=mess.substring(5, mess.length());
                 int nb = Integer.parseInt(nbstr);
                 if(nb==0){
@@ -69,7 +69,7 @@ public class Cogestionnaire extends Thread{
                 out.flush();
                 //recu confiration ?
                 String mess = in.readLine();
-                System.out.println("recu "+mess+"de "+cs.toString());
+                System.out.println("recu "+mess+" de "+cs.toString());
                 if(mess.equals("RALL")){System.out.println("Message bien recu par le gestionnaire");}
 
 

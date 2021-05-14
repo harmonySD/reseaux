@@ -22,7 +22,7 @@ public class Utilisateur2{
 
         try{
             while(true){
-                System.out.println("diffuseur ou gestionnaire");
+                System.out.println("diffuseur ou gestionnaire ?");
                 String choix = sc.nextLine();
                 if(choix.equals("diffuseur")){
                     //demander ip port etc

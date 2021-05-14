@@ -64,11 +64,10 @@ public class AttendTCP extends Thread{
                     out.flush();
                     //recoit
                     String mess = in.readLine();
-                    System.out.println("recu "+mess+"de "+cs.toString());
+                    System.out.println("recu "+mess+" de "+cs.toString());
                     if(!mess.equals("ACKM")){
                         System.out.println("message non recu par le diffuseur");
                     }
-
                 }
                 else if(msg.equals("LAST")){
                     System.out.println("afficher combien de messages :");
@@ -79,21 +78,19 @@ public class AttendTCP extends Thread{
                     out.flush();
                     //recoit
                     String mess = in.readLine();
-                    System.out.println(mess);
                     while(!mess.equals("ENDM")){
-                        mess = in.readLine();
                         System.out.println(mess);
+                        mess = in.readLine();
                     }
-                    System.out.println(mess+"de "+cs.toString());
-
-
-
+                    System.out.println("recu "+mess+" de "+cs.toString());
                 }
                 else if(msg.equals("q")){
                     arret=true;
-                    System.out.println("Au revoir 👋🏻");
+                    System.out.println("Au revoir !");
                 }
-                
+            }
+            catch(NullPointerException e){
+                System.out.println("erreur ce n'est pas un nombre x)");
             }
             catch (ConnectException e){
             System.out.println("erreur connexion : Veuillez vous connecter plus tard (diffuseur non connecté)");
