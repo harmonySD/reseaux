@@ -1,0 +1,87 @@
+Classe Diffuseur
+
+
+___Idée générale 
+Cette classe rassemble 
+tout ce qui est nécessaire pour former un diffuseur,
+entité réseau qui reçoit des messsages de clients, 
+se fait connaître des gestionnaires de diffuseurs
+et émet des messages d'après ceux reçus par les clients 
+Une instance de la classe diffuseur = une borne de diffusion, peut en exiser plusieurs par machine et par réseau
+
+___Dépendances__
+
+holder.java
+prefixes.java
+message.java
+
+RAPPEL
+num-mess 4 octets chaîne de caractères correspondant à un nombre, numéro d'un message
+id  8 octets  chaîne de caractères quelconques pour identifier client et diffuseur.
+mess 140 octets  chaîne de caractères quelconques, contenu d'un message. 
+nb-mess 3 octets chaîne de caractères correspondant au nombre de messages. 
+ip1 ou ip2 15  octets chaîne  de  caractères  correspondant  à une adresse IPv4. 
+port1 ou port2  4 octets chaîne de caractères correspondant à un numéro de port.
+num-diff 2 octets contient une chaîne de caractères correspondant au nombre de diffuseurs. S
+
+___Liste des messages que peut envoyer le diffuseur 
+* "DIFF num-mess id message" 
+* "ACKM"
+* "OLDM num-mess id message"
+* "ENDM" 
+
+___Liste des messages que peut recevoir le diffuseur
+
+* "MESS id message"
+* "LAST nb-mess"
+
+
+___Champs d'instance du diffuseur 
+
+* "id" entier, 
+identifiant du diffuseur, 
+chaîne de caractère d'au plus 8 caractères,
+déterminé une fois pour toutes au lancement du diffuseur
+
+* rcvprt entier,  port de réception sur lequel écoute receiveloop
+* diffprt entier, port de diffusion sur lequel émet multicastloop
+* frqcy entier, intervalle de temps minimal entre la diffusion de deux messages par le diffuseur sur le port de diffusion
+* messglist liste, 
+SOURCE D'ACCES CONCCURRENT entre broadcastloop,receiveloop, et historygiver
+liste contenant tous les messages que le diffuseur peut diffuser ***
+* broadcastthread Thread, contient le thread de la fonction de broadcast
+* receivethread Thread, contient le thread de la fonction de receive
+* broadcastThreadIsWaiting booléen qui permet de savoir si la boucle de broadCast est entrain d'attendre sur le diffuseur qu'un nouveau message est disponible à l'envoi 
+si c'est le cas il faut notify le Holder du Diffuseur pour lui dire de reprendre son émission de messages  
+
+___méthodes d'instances
+
+* broadcastloop() 
+boucle de diffusion envoi des messages en continu, dans un thread 
+si un message renvoyé par Holder n'est pas de la bonne taille, 
+n'envoit pas ledit message, affiche un message d'erreur sur la sortie d'erreur 
+et continue son exécution
+
+* receiveloop() boucle de réception de nouveaux messages à diffuser en continu en plus de ceux déjà présents, dans un thread.
+appelle aussi des historygiver dans des nouveaux thread lorsque des gens souhaitent avoir un historique des derniers messages envoyés
+
+*  historygiver() fonction qui sert à fournir à un utilisateur une liste des derniers messages diffusés à un instant T
+se créé puis se détruit "à la demande" lors qu'un client veut l'historique et une fois que c'est terminé dans un thread, un par client.
+sera créé à partir de receiveloop
+
+* startBroadcast () signale au diffuseur qu'il doit commencer à émettre 
+* startListen () signale au diffuseur qu'il doit commencer à écouter sur le port spécifier des demandes de client ou de gestionnaire
+
+* stopServer() signale au diffuseur qu'il doit arrêter d'émettre et de recevoir.
+	lance des signaux d'interruptions aux deux threads
+___champs statiques 
+
+??
+___méthodes statiques
+main du diffuseur pour lancer un petit serveur de diffusion standalone 
+pour l'instant prend 4 arguments dans cet ordre : 
+id du diffuseur 
+port de réception tcp
+port de multicast
+adresse de multicast
+et lis une dizaine de messages manuellement. Il faut l'arrêter interrompre le programme à la main.

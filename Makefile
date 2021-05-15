@@ -12,7 +12,13 @@ CLASSES =\
 		AttendTCP.java \
 		Cogestionnaire.java 
 
-ALL=gestio client Utilisateur2
+CLASSES2 =\
+			Diffuseur.java \
+			Holder.java \
+			Message.java \
+			Prefixes.java 
+
+ALL=gestio client Utilisateur2 Diffuseur
 
 all: $(ALL)
 
@@ -30,6 +36,8 @@ gestio: gestionnaire.o
 
 
 Utilisateur2: $(CLASSES:.java=.class)
+
+Diffuseur : $(CLASSES2:.java=.class)
 
 
 clean:
