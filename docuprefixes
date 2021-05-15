@@ -1,0 +1,50 @@
+
+Classe prefixes
+
+
+___Idée générale 
+
+
+Cette classe est une énumération qui permet de stocker
+tous les préfixes de communications utilisés par tous, c-a-d
+- les clients
+- les serveurs 
+- les gestionnaires
+
+___Dépendances
+
+___liste complète des instances
+
+DIFF
+MESS
+ACKM
+LAST
+OLDM
+ENDM
+REGI
+REOK
+RENO
+RUOK
+IMOK
+LIST
+LINB
+ITEM
+
+___Champs d'instances
+
+normalMessLength la longueur normale / maximale d'un message attendu ayant ce préfixe
+
+___méthodes d'instances
+
+@Override toString 
+renvoit le nom de l'objet tel que déclarer dans l'énumération,
+grâce à this.name
+
+___champs statiques 
+
+
+
+___méthodes statiques
+
+
+
