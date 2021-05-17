@@ -2,21 +2,23 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 
 public class Message {
-	// tailles fixée des données / nom utilisateur
-	public static final int IDSZ=8;
-	public static final int DATASZ=140;
+
+	public static final int IDSZ=8; // taille fixe du nom d'utilisateur
+	public static final int DATASZ=140; // taille fixe des données d'un message
 	
-	private final String id ;
-	private final String data  ;
+	private final String id ;  // stocke le nom de l'utilisateur
+	private final String data  ; // stocke son message 
 	
 	public Message(String useraw, String messageraw ){
-		
+		/**Ce constructeur accepte des chaînes trop longues ou trop courtes et les comblera / les  rabotera. 
+		 * Il essaye d'enlever les éventuels accents que porterait le message pour qu'il fasse bien 140 octets de long.
+		 * **/
 		
 		
 		
 		String userid = Normalizer.normalize(useraw, Form.NFD) .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");// CETTE LIGNE DE CODE A ETE RECUPEREE SUR INTERNET
 		String message = Normalizer.normalize(messageraw, Form.NFD) .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");// CETTE LIGNE DE CODE A ETE RECUPEREE SUR INTERNET
-		// ces lignes ont ete recuperes sur https://www.drillio.com/en/2011/java-remove-accent-diacritic/
+		// ces deux  lignes ont ete recuperes sur https://www.drillio.com/en/2011/java-remove-accent-diacritic/
 		
 		// stockage id de l'émetteur du message
 		if (userid.length() != Message.IDSZ ){
@@ -27,13 +29,13 @@ public class Message {
 		if (message.length() != Message.DATASZ ){
 			if (message.length() > Message.DATASZ){this.data = message.substring(0,Message.DATASZ);}
 			else{this.data = message+("#".repeat( Message.DATASZ - message.length() ));}
-		}else {this.data=message;}
+		}else{this.data=message;}
 		
 	}
 	
 	@Override 
 	public String toString(){
-		// modifiée pour faciliter la récupération des données pour l'envoi d'un message sur le réseau
+		/**Cette fonction a été redéfinie pour permettre de récupérer un Message facilement au format requis.**/
 		return this.id+" "+this.data;
 	}
 	public String getId(){return this.id;}

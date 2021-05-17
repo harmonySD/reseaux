@@ -30,21 +30,24 @@ public class Holder implements Iterator<String> {
 	}
 	@Override
 	public synchronized boolean hasNext() { 
+		/** Si le gestionnaire a encore des messages à fournir à l'envoi.**/
 		return toSendOccupation < 1 ? false:true;
 	}
 	@Override
-	public  synchronized String next() throws NoSuchElementException { // renvoit le prochain message à envoyer
+	public  synchronized String next() throws NoSuchElementException { 
+		/**Cette fonction renvoit le prochain message à émettre et le stocke dans l'historique des messages envoyés**/
 		Message temp = toSendQueue.remove(); // lance NSEException si queue vide
 		this.toSendOccupation --; //maj occupation file à envoyer
 		String toret =String.format("%04d",this.nextMessageNumber)+" "+temp.toString();// ajout du numéro du message pour envoi
 		if (this.historyOccupation< HOLDSZ){this.historyOccupation++;}
-		this.HistoryQueue[this.nextMessageNumber]=temp;
+		this.HistoryQueue[this.nextMessageNumber]=temp; // ajout automatique d'un message fourni à l'historique des messages envoyés
 		this.nextMessageNumber=(this.nextMessageNumber  +1 )%HOLDSZ;
 		return toret;// la taille de toret doit être 
 	}
 	
 	
 	public synchronized String[] retrieveHistory(int howmany){
+		/** Cette fonction permet d'avoir un tableau des messages qui ont été émis  **/
 		if(1>howmany){return new String[0]; }
 	    String [] toret;
 	    if(( howmany< this.nextMessageNumber ) || Holder.HOLDSZ > this.historyOccupation){

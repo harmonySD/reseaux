@@ -1,7 +1,8 @@
 public enum Prefixes {
 	// liste uniformisée de tous les 
 	// préfixe admissible sur le réseau
-	 DIFF(161)
+	// Le paramètre est la taille standard d'un message muni d'\r\n
+	 DIFF(161) 
 	,MESS(156)
 	,MALL(156)
 	,ACKM(6)
@@ -15,11 +16,11 @@ public enum Prefixes {
 	,IMOK(6)
 	,LIST(6)
 	,LINB(9)
-	,ITEM(1417); // FIXME quelle taille attendue ici ?
+	,ITEM(53); 
 	Prefixes(int normallyWaitedMessagelength){ this.normalMessLength =normallyWaitedMessagelength;}
-	public static final int headerSZ = 4;
-	public final int normalMessLength;
+	public static final int headerSZ = 4; // taille d'un entête , toujours 4 octets /4 caractères
+	public final int normalMessLength; 
 	@Override 
-	public String toString(){ return this.name();}
+	public String toString(){ return this.name();} // pour obtenir le format du mot clé à envoyer
 }
 
