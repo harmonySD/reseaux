@@ -183,7 +183,7 @@ void *sendMessage(void *coco) {
             char message[SM+FIN];
             scanf("%[^\n]%*c", message);
             fflush(stdin);
-            if(strstr(message, "MESS")){
+            if(strcmp(message,"MESS")==0){
                 char messAenv[SIZE_MESS];
                 printf("%s", "Entree votre message d'au plus 140 characteres: ");
                 scanf("%[^\n]%*c", messAenv);
@@ -209,7 +209,7 @@ void *sendMessage(void *coco) {
                 if(strstr(recu,"ACKM") == NULL){
                     printf("Message non recu par le diffuseur");
                 }
-            }else if(strstr(message, "LAST")){
+            }else if(strcmp(message, "LAST")==0){
                 char nb[SM];
                 printf("%s", "Afficher combien de message de l'historique : ");
                 scanf("%[^\n]%*c", nb);
@@ -236,7 +236,12 @@ void *sendMessage(void *coco) {
                     recu[taille_rec] = '\0';
                 }
                 printf("recu %s de l'addresse %s avec le port %d\n",recu,inet_ntoa((struct in_addr)adress_sock2.sin_addr),ntohs(adress_sock2.sin_port));
+            }else{
+                close(descr);
+                printf("vous avez été éjecté du TCP pour cause de demande inconnu \n");
+                return NULL;
             }
+
         }else{
             printf("Erreur connexion : Veuillez vous connecter plus tard (diffuseur non connecté)\r\n");
             break;
