@@ -11,17 +11,20 @@
 ```
 > make
 ```
-***pour le diffuseur***
-```
-> Utilisez le Script Shell Diffuseur.sh, contentez vous simplement de renseigner les variables au début du fichier
-> puis de l'exécuter APRES le lancement du gestionnaire(sinon pas de communcation avec le gestionnaire)
-```
 ***pour le gestionnaire :***
 ```
 >./gestio port
 ```
 *Avec* 
 - `port` : port du gestionnaire 
+
+***pour le diffuseur***
+Utilisez le Script Shell Diffuseur.sh, contentez vous simplement de renseigner les variables au début du fichier
+puis de l'exécuter APRES le lancement du gestionnaire(sinon pas de communcation avec le gestionnaire)
+***pour le gestionnaire :***
+```
+>./Diffuseur.sh
+```
 
 ***pour l'utilisateur***
 
@@ -35,9 +38,9 @@
 - `tty`: lien d'un fichier **IO** d'un autre terminale, pour y afficher les messages recu d'un diffuseur
 - `pseudo` : le pseudo de votre choix 
 ***
-Pour envoyer un message taper `MESS` puis votre message !
+Pour envoyer un message taper `MESS`, puis `Entrez` puis votre message !
 
-Pour demander l'historique taper `LAST` puis le nombre de messages voulu !
+Pour demander l'historique taper `LAST`, puis `Entrez` puis le nombre de messages voulu !
 ****
 
 *le client en Java faire :*
@@ -52,23 +55,35 @@ Choix a faire entre gestionnaire ou diffuseur.
 - Si diffuseur taper `diffuseur` puis les informations concernant ce diffuseur.
 - Si  gestionnaire taper `gestionnaire` puis un port.
 
-Pour envoyer un message taper `MESS`puis votre message !
+Pour envoyer un message taper `MESS`, puis `Entrez` puis votre message !
 
-Pour demander l'historique taper `LAST`puis le nombre de messages voulu !
+Pour demander l'historique taper `LAST`, puis `Entrez` puis le nombre de messages voulu !
 
 Pour quitter un diffuseur taper `q`!
 ****
 
 ***
 ***Diffuseur***
+
 `Utilisation du Diffuseur`
+
 le Diffuseur est complètement autonome dans son utilisation. 
 Une fois démarré il gère automatiquement 
-\- les connexions de client
-\- les connexions de Gestionnaire pour MALL
-\- 
+- les connexions de client
+- les connexions de Gestionnaire pour MALL
+
 Il supporte la connexion concurrentielle de plusieurs clients/ gestionnaire pour MALL, LAST, MESS.
+
 ***Gestionnnaire***
+
+`Utilisation du Gestionnaire`
+
+le Gestionnaire est complètement autonome dans son utilisation. 
+Une fois démarré il gère automatiquement 
+- les connexions de client
+- les connexions de diffuseur
+
+Il supporte la connexion concurrentielle de plusieurs clients et diffuseurs pour MALL, LIST, REGI.
 
 ***Utilisateur***
 
