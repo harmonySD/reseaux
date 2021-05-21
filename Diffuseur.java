@@ -180,7 +180,7 @@ public class Diffuseur{
 			}
 		}catch(Exception e){
 			System.err.println("ATTENTION LE DIFFUSEUR ARRETE D'ECOUTER POUR DES CONNEXIONS TCP \n"
-			" A CAUSE DE l'EXCEPTION  SUIVANTE : "+e.toString())}
+			+" A CAUSE DE l'EXCEPTION  SUIVANTE : "+e.toString());}
 	}
 	
 	private void receiveLoopSwitchMan(Socket connSock) {
@@ -190,7 +190,10 @@ public class Diffuseur{
 		try{
 			byte[] gestHeader = new byte[Prefixes.headerSZ];
 			if(Prefixes.headerSZ != connSock.getInputStream().read(gestHeader)){
-				connSock.close();return;
+				connSock.close();
+				System.out.println("L'entité connecté "+connSock.toString()+" a envoyé un entête trop court,'"+new String(gestHeader)
+				+ "' fermeture.");
+				return;
 			}
 			String headerCont = new String(gestHeader);
 			if( headerCont.equals(Prefixes.LAST.toString())){
@@ -230,7 +233,7 @@ private  void historygiver(Socket commSock){
 			bfred.read(buffer);
 			String mssgContent = new String(buffer);
 			if(Prefixes.LAST.normalMessLength -Prefixes.headerSZ  != mssgContent.length()
-					|| bfred.ready() || buffer[0]!=' ' || buffer[4]!=' '){
+					|| bfred.ready() || buffer[0]!=' '){
 				System.err.println("Une erreur est survenue avec "+commSock.getLocalSocketAddress().toString()
 						+"le contenu après LAST était de taille incorrecte ou mal formé;\n"
 						+"taille attendue: "+Integer.valueOf(Prefixes.LAST.normalMessLength -Prefixes.headerSZ )
@@ -405,18 +408,19 @@ private  void historygiver(Socket commSock){
 	synchronized Holder getHolder(){/** à utiliser uniquement à des fins de débogage !  package private**/return this.msgHolder;}
 
 	public static void main (String [] args)throws Exception {
+		//public Diffuseur(String MultiCasterID,String localMde, int recvPort,  int multiCastPort, String multiCastAddress )
 		Diffuseur lediff = new Diffuseur(args[0], args[1],Integer.valueOf(args[2]), Integer.valueOf(args[3]),args[4]);
 		try(Scanner sc = new Scanner(System.in);){
 			String temp;
 			for(int i =0;i<220;i++){
 				temp = sc.nextLine();
-				lediff.addAMessage(new Message("M0ral3s",temp));	
+				lediff.addAMessage(new Message(args[0],temp));	
 			}
 		}catch(NoSuchElementException ns){return;}
-		synchronized(lediff.msgHolder) {
-			lediff.msgHolder.notify();
-			}
-			lediff.addGestionnaireLink(InetAddress.getByName("127.0.1.1"),4444); //ICI LE CHOIX DU GESTIONNAIRE
+		//synchronized(lediff.msgHolder) {
+			//lediff.msgHolder.notify(); //pour signaler en premier lieu au gestionnaire qu'il doit se réveiller
+			//}
+			lediff.addGestionnaireLink(InetAddress.getByName(args[5]),Integer.valueOf(args[6])); //ici l'ajout d'un gestionnaire
 		try{
 		Object lock= new Object();
 		synchronized(lock){

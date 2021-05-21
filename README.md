@@ -13,7 +13,8 @@
 ```
 ***pour le diffuseur***
 ```
->
+> Utilisez le Script Shell Diffuseur.sh, contentez vous simplement de renseigner les variables au début du fichier
+> puis de l'exécuter APRES le lancement du gestionnaire(sinon pas de communcation avec le gestionnaire)
 ```
 ***pour le gestionnaire :***
 ```
@@ -60,7 +61,13 @@ Pour quitter un diffuseur taper `q`!
 
 ***
 ***Diffuseur***
-
+`Utilisation du Diffuseur`
+le Diffuseur est complètement autonome dans son utilisation. 
+Une fois démarré il gère automatiquement 
+\- les connexions de client
+\- les connexions de Gestionnaire pour MALL
+\- 
+Il supporte la connexion concurrentielle de plusieurs clients/ gestionnaire pour MALL, LAST, MESS.
 ***Gestionnnaire***
 
 ***Utilisateur***
