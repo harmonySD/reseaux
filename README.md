@@ -21,9 +21,9 @@
 ***pour le diffuseur***
 Utilisez le Script Shell Diffuseur.sh, contentez vous simplement de renseigner les variables au début du fichier
 puis de l'exécuter APRES le lancement du gestionnaire(sinon pas de communcation avec le gestionnaire)
-***pour le gestionnaire :***
+
 ```
->./Diffuseur.sh
+>./Diffusion.sh
 ```
 
 ***pour l'utilisateur***
@@ -82,6 +82,7 @@ Il supporte la connexion concurrentielle de plusieurs clients/ gestionnaire pour
 
 le Gestionnaire est complètement autonome dans son utilisation. 
 Une fois démarré il gère automatiquement 
+- la vérification d'état auprès d'un gestionnaire
 - les connexions de client
 - les connexions de diffuseur
 
