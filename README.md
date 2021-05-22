@@ -31,10 +31,11 @@ puis de l'exécuter APRES le lancement du gestionnaire(sinon pas de communcation
 *le client en C faire :*
 
 ```
->./client port tty pseudo 
+>./client port adressegestio tty pseudo 
 ```
 *Avec*
 - `port` : port d'un gestionnaire
+- `adressgestio` : adresse d'un gestionnaire *(sur les machines de l'ufr mettre 70 pas 070)*
 - `tty`: lien d'un fichier **IO** d'un autre terminale, pour y afficher les messages recu d'un diffuseur
 - `pseudo` : le pseudo de votre choix 
 ***
@@ -53,7 +54,8 @@ Pour demander l'historique taper `LAST`, puis `Entrez` puis le nombre de message
 ****
 Choix a faire entre gestionnaire ou diffuseur.
 - Si diffuseur taper `diffuseur` puis les informations concernant ce diffuseur.
-- Si  gestionnaire taper `gestionnaire` puis un port.
+- Si  gestionnaire taper `gestionnaire` puis un port, l'addresse ou se trouve le gestionnaire *(sur les machines de l'ufr mettre 070 pas 70)*. Pour envoyer un message au gestionnaire afin qu'il le diffuse a tous ses diffuseurs, repondre `y`. Sinon repondre `n` pour avoir la liste des diffuseurs enregistrés.
+
 
 Pour envoyer un message taper `MESS`, puis `Entrez` puis votre message !
 
@@ -87,12 +89,15 @@ Il supporte la connexion concurrentielle de plusieurs clients et diffuseurs pour
 
 ***Utilisateur***
 
-`connection_gestionnaire`
+En C:
 
-Se connecte a un gestionnaire (*grâce au port donner en argument*), et demande la liste des diffuseur.
-Enregistre toutes les informations recues sur les diffuseurs dans la structure `diffu`. Puis choisis *aleatoirement* un diffuseur parmis la liste de structure. 
-Renvoie une structure avec les info sur le diffuseur choisi.
+Le client est semi interactif. Une fois démarré il gère automatiquement 
+- la connexion au gestionnnaire
+- la connexion a un diffuseur (choisis aléatoirement)
 
-`connection_diffuseur`
 
-Se connecte a un diffuseur, creation d'un thread pour l'interaction entre le client et le diffuseur. Pendant ce temps les messages recu du diffuseur sont afficher dans le terminale donner par tty. 
+En java : 
+
+Le client est totalement intéractif.
+
+
