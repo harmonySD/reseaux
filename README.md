@@ -71,6 +71,7 @@ Pour quitter un diffuseur taper `q`!
 
 le Diffuseur est complètement autonome dans son utilisation. 
 Une fois démarré il gère automatiquement 
+- la vérification d'état auprès d'un gestionnaire
 - les connexions de client
 - les connexions de Gestionnaire pour MALL
 
@@ -82,7 +83,7 @@ Il supporte la connexion concurrentielle de plusieurs clients/ gestionnaire pour
 
 le Gestionnaire est complètement autonome dans son utilisation. 
 Une fois démarré il gère automatiquement 
-- la vérification d'état auprès d'un gestionnaire
+
 - les connexions de client
 - les connexions de diffuseur
 
